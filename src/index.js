@@ -54,53 +54,93 @@ export function initKeys() {
     // window.addEventListener('blur', blurEventHandler);
 }
 
+class Player {
+    states() {
+        return {
+            "stop": 0,
+            "up": 1,
+            "down": 2,
+        }
+    }
+
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.state = this.states()["stop"];
+    }
+}
+
 class Loop {
     constructor() {
 
-        this.p1 = "stop";
-        this.x = 0;
-        this.y = 0;
+        this.p1 = new Player(0, 0);
+        this.p2 = new Player(canvas.width - paddleWidth, canvas.height - paddleHeight);
 
-        this.u = canvas.width - paddleWidth;
-        this.v = canvas.height - paddleHeight;
+        callbacks['s'] = (evt) => this.p1_up(evt);
+        callbacks['w'] = (evt) => this.p1_down(evt);
 
-        callbacks['w'] = (evt) => this.p1_up(evt);
-        callbacks['s'] = (evt) => this.p1_down(evt);
+        callbacks['down'] = (evt) => this.p2_up(evt);
+        callbacks['up'] = (evt) => this.p2_down(evt);
     }
 
     p1_up(evt) {
-        this.p1 = "up";
+        this.p1.state = this.p1.states()["up"];
         // console.log(this.y);
     }
 
     p1_down(evt) {
-        this.p1 = "down"
+        this.p1.state = this.p1.states()["down"];
+        // console.log(this.y);
+    }
+
+    p2_up(evt) {
+        this.p2.state = this.p2.states()["up"];
+        // console.log(this.y);
+    }
+
+    p2_down(evt) {
+        this.p2.state = this.p2.states()["down"];
         // console.log(this.y);
     }
 
     update(dt) {
-        if (this.p1 === "up") {
-            this.y += dt;
-            this.p1 = "stop";
+        if (this.p1.state === this.p1.states()["up"]) {
+            this.p1.y += dt;
+            this.p1.state = this.p1.states()["stop"];
         }
-        if (this.p1 === "down") {
-            this.y -= dt;
-            this.p1 = "stop";
+        if (this.p1.state === this.p1.states()["down"]) {
+            this.p1.y -= dt;
+            this.p1.state = this.p1.states()["stop"]
         }
-        if (canvas.height - paddleHeight < this.y) {
-            this.y = canvas.height - paddleHeight;
+        if (canvas.height - paddleHeight < this.p1.y) {
+            this.p1.y = canvas.height - paddleHeight;
         }
-        if (this.y < 0) {
-            this.y = 0;
+        if (this.p1.y < 0) {
+            this.p1.y = 0;
+        }
+
+        if (this.p2.state === this.p2.states()["up"]) {
+            this.p2.y += dt;
+            this.p2.state = this.p2.states()["stop"];
+        }
+        if (this.p2.state === this.p2.states()["down"]) {
+            this.p2.y -= dt;
+            this.p2.state = this.p2.states()["stop"]
+        }
+        if (canvas.height - paddleHeight < this.p2.y) {
+            this.p2.y = canvas.height - paddleHeight;
+        }
+        if (this.p2.y < 0) {
+            this.p2.y = 0;
         }
     }
 
     render() {
         context.clearRect(0, 0, canvas.width, canvas.height);
         context.fillStyle = 'yellow';
-        context.fillRect(this.x, this.y, paddleWidth, paddleHeight);
+        context.fillRect(this.p1.x, this.p1.y, paddleWidth, paddleHeight);
         context.fillStyle = 'cyan';
-        context.fillRect(this.u, this.v, paddleWidth, paddleHeight);
+        context.fillRect(this.p2.x, this.p2.y, paddleWidth, paddleHeight);
     }
 }
 
@@ -126,7 +166,14 @@ function animator() {
     function animate(timestamp) {
         requestAnimationFrame(animate);
 
-        accumulator += _dt();
+        let dt = _dt();
+
+        accumulator += dt;
+        i += 1;
+        if (i > 20) {
+            console.log(1000.0 / dt);
+            i = 0;
+        }
 
         while (accumulator > period) {
             loop.update(period);
