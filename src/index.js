@@ -164,7 +164,7 @@ class Loop {
 
     update(dt) {
 
-        let paddleSpeed = dt / 3;
+        let paddleSpeed = 4.4;
 
         if (this.p1.state === this.p1.states()["up"]) {
             this.p1.dy = - paddleSpeed;
@@ -255,16 +255,16 @@ class Loop {
     }
 
     render() {
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        // context.clearRect(0, 0, canvas.width, canvas.height);
         context.fillStyle = "#2B294B";
         context.fillRect(0, 0, canvas.width, canvas.height);
 
         context.fillStyle = this.p1.colour;
-        context.fillRect(this.p1.x, this.p1.y, this.p1.width, this.p1.height);
+        context.fillRect(Math.floor(this.p1.x), Math.floor(this.p1.y), this.p1.width, this.p1.height);
         context.fillStyle = this.p2.colour;
-        context.fillRect(this.p2.x, this.p2.y, this.p2.width, this.p2.height);
+        context.fillRect(Math.floor(this.p2.x), Math.floor(this.p2.y), this.p2.width, this.p2.height);
         context.fillStyle = this.ball.colour;
-        context.fillRect(this.ball.x, this.ball.y, this.ball.width, this.ball.height);
+        context.fillRect(Math.floor(this.ball.x), Math.floor(this.ball.y), this.ball.width, this.ball.height);
     }
 }
 
