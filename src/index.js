@@ -235,11 +235,11 @@ class Loop {
             this.ball.y = canvas.height - this.ball.height;
             this.ball.dy = - this.ball.dy * 0.9;
         } 
-        if (this.ball.x < 0) {
+        if (this.ball.x + this.ball.width < 0) {
             this.ball.reset();
             // this.ball.x = 0;
             // this.ball.dx = - this.ball.dx * 0.9;
-        } else if (canvas.width < this.ball.x + this.ball.width) {
+        } else if (canvas.width < this.ball.x) {
             this.ball.reset();
             // this.ball.x = canvas.width - this.ball.width;
             // this.ball.dx = - this.ball.dx * 0.9;
