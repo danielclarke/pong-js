@@ -1,3 +1,5 @@
+import AABB, {Point} from "./aabb.js";
+
 const canvas = document.getElementById('canvas');
 const context = canvas.getContext('2d');
 const FPS = 60;
@@ -5,7 +7,8 @@ const paddleWidth = 10;
 const paddleHeight = 30;
 let loop;
 
-let callbacks = {};
+let kdCallbacks = {};
+let kuCallbacks = {};
 let pressedKeys = {};
 
 export let keyMap = {
@@ -23,13 +26,18 @@ function keydownEventHandler(evt) {
     let key = keyMap[evt.which];
     pressedKeys[key] = true;
     
-    if (callbacks[key]) {
-        callbacks[key](evt);
+    if (kdCallbacks[key]) {
+        kdCallbacks[key](evt);
     }
 }
 
-function keyupEventHandler(evt) {
-    pressedKeys[ keyMap[evt.which] ] = false;
+function keyupEventHandler(evt) {    
+    let key = keyMap[evt.which];
+    pressedKeys[key] = false;
+    
+    if (kuCallbacks[key]) {
+        kuCallbacks[key](evt);
+    }
 }
 
 export function initKeys() {
@@ -63,55 +71,100 @@ class Player {
         }
     }
 
-    constructor(x, y) {
+    constructor(x, y, colour="black") {
         this.x = x;
         this.y = y;
+        this.dy = 0;
+        this.width = paddleWidth;
+        this.height = paddleHeight;
+        this.colour = colour;
         this.state = this.states()["stop"];
+    }
+}
+
+class Ball {
+    constructor(x, y, colour) {
+        this.x = x;
+        this.y = y;
+        this.dx = 0;
+        this.dy = 0;
+        this.width = 10;
+        this.height = 10;
+        this.colour = colour;
+        this.served = false;
+    }
+
+    update() {
+        this.x += this.dx;
+        this.y += this.dy;
+    }
+
+    serve() {
+        if (this.served === false) {
+            this.served = true;
+            this.dx = 5;
+        }
     }
 }
 
 class Loop {
     constructor() {
 
-        this.p1 = new Player(0, 0);
-        this.p2 = new Player(canvas.width - paddleWidth, canvas.height - paddleHeight);
+        this.p1 = new Player(0, 0, "magenta");
+        this.p2 = new Player(canvas.width - paddleWidth, canvas.height - paddleHeight, "cyan");
+        this.ball = new Ball(canvas.width / 2, canvas.height / 2, "yellow");
 
-        callbacks['s'] = (evt) => this.p1_up(evt);
-        callbacks['w'] = (evt) => this.p1_down(evt);
+        kdCallbacks['space'] = (evt) => this.ball.serve();
 
-        callbacks['down'] = (evt) => this.p2_up(evt);
-        callbacks['up'] = (evt) => this.p2_down(evt);
+        kdCallbacks['w'] = (evt) => this.p1_up(evt);
+        kdCallbacks['s'] = (evt) => this.p1_down(evt);
+        kuCallbacks['w'] = (evt) => this.p1_stop(evt);
+        kuCallbacks['s'] = (evt) => this.p1_stop(evt);
+
+        kdCallbacks['up'] = (evt) => this.p2_up(evt);
+        kdCallbacks['down'] = (evt) => this.p2_down(evt);
+        kuCallbacks['up'] = (evt) => this.p2_stop(evt);
+        kuCallbacks['down'] = (evt) => this.p2_stop(evt);
     }
 
     p1_up(evt) {
         this.p1.state = this.p1.states()["up"];
-        // console.log(this.y);
     }
 
     p1_down(evt) {
         this.p1.state = this.p1.states()["down"];
-        // console.log(this.y);
+    }
+
+    p1_stop(evt) {
+        this.p1.state = this.p1.states()["stop"];
     }
 
     p2_up(evt) {
         this.p2.state = this.p2.states()["up"];
-        // console.log(this.y);
     }
 
     p2_down(evt) {
         this.p2.state = this.p2.states()["down"];
-        // console.log(this.y);
+    }
+
+    p2_stop(evt) {
+        this.p2.state = this.p2.states()["stop"];
     }
 
     update(dt) {
+
+        let paddleSpeed = dt / 4;
+
         if (this.p1.state === this.p1.states()["up"]) {
-            this.p1.y += dt;
-            this.p1.state = this.p1.states()["stop"];
+            this.p1.dy = - paddleSpeed;
+        } else if (this.p1.state === this.p1.states()["down"]) {
+            this.p1.dy = paddleSpeed;
+        } else {
+            this.p1.dy = 0;
         }
-        if (this.p1.state === this.p1.states()["down"]) {
-            this.p1.y -= dt;
-            this.p1.state = this.p1.states()["stop"]
-        }
+
+        this.p1.y += this.p1.dy;
+        
         if (canvas.height - paddleHeight < this.p1.y) {
             this.p1.y = canvas.height - paddleHeight;
         }
@@ -119,28 +172,76 @@ class Loop {
             this.p1.y = 0;
         }
 
-        if (this.p2.state === this.p2.states()["up"]) {
-            this.p2.y += dt;
-            this.p2.state = this.p2.states()["stop"];
+        // if (this.p2.state === this.p2.states()["up"]) {
+        //     this.p2.dy = - paddleSpeed;
+        // } else if (this.p2.state === this.p2.states()["down"]) {
+        //     this.p2.dy = paddleSpeed;
+        // } else {
+        //     this.p2.dy = 0;
+        // }
+
+        if (this.p2.y + this.p2.height / 2 < this.ball.y + 2 * this.ball.height / 3) {
+            this.p2.dy = paddleSpeed;
         }
-        if (this.p2.state === this.p2.states()["down"]) {
-            this.p2.y -= dt;
-            this.p2.state = this.p2.states()["stop"]
+
+        if (this.ball.y + this.ball.height / 3 < this.p2.y + this.p2.height / 2) {
+            this.p2.dy = - paddleSpeed;
         }
+
+        this.p2.y += this.p2.dy;
         if (canvas.height - paddleHeight < this.p2.y) {
             this.p2.y = canvas.height - paddleHeight;
         }
         if (this.p2.y < 0) {
             this.p2.y = 0;
         }
+
+        this.ball.update();
+
+        let ballAABB = new AABB(new Point(this.ball.x, this.ball.y), this.ball.width, this.ball.height);
+        let p1AABB = new AABB(new Point(this.p1.x, this.p1.y), this.p1.width, this.p1.height);
+        let p2AABB = new AABB(new Point(this.p2.x, this.p2.y), this.p2.width, this.p2.height);
+
+        if (ballAABB.intersects(p1AABB)) {
+            this.ball.dx = - this.ball.dx * 1.05;
+            this.ball.dy += this.p1.dy;
+            if (this.ball.x < this.p1.x + this.p1.width) {
+                this.ball.x = this.p1.x + this.p1.width;
+            }
+        }
+        if (ballAABB.intersects(p2AABB)) {
+            this.ball.dx = - this.ball.dx * 1.05;
+            this.ball.dy += this.p2.dy;
+            if (this.p2.x - this.ball.width < this.ball.x) {
+                this.ball.x = this.p2.x - this.ball.width;
+            }
+        }
+
+        if (this.ball.y < 0) {
+            this.ball.y = 0;
+            this.ball.dy = - this.ball.dy * 0.9;
+        } else if (canvas.height < this.ball.y + this.ball.height) {
+            this.ball.y = canvas.height - this.ball.height;
+            this.ball.dy = - this.ball.dy * 0.9;
+        } 
+        if (this.ball.x < 0) {
+            this.ball.x = 0;
+            this.ball.dx = - this.ball.dx * 0.9;
+        } else if (canvas.width < this.ball.x + this.ball.width) {
+            this.ball.x = canvas.width - this.ball.width;
+            this.ball.dx = - this.ball.dx * 0.9;
+        }
+
     }
 
     render() {
         context.clearRect(0, 0, canvas.width, canvas.height);
-        context.fillStyle = 'yellow';
-        context.fillRect(this.p1.x, this.p1.y, paddleWidth, paddleHeight);
-        context.fillStyle = 'cyan';
-        context.fillRect(this.p2.x, this.p2.y, paddleWidth, paddleHeight);
+        context.fillStyle = this.p1.colour;
+        context.fillRect(this.p1.x, this.p1.y, this.p1.width, this.p1.height);
+        context.fillStyle = this.p2.colour;
+        context.fillRect(this.p2.x, this.p2.y, this.p2.width, this.p2.height);
+        context.fillStyle = this.ball.colour;
+        context.fillRect(this.ball.x, this.ball.y, this.ball.width, this.ball.height);
     }
 }
 
@@ -169,11 +270,11 @@ function animator() {
         let dt = _dt();
 
         accumulator += dt;
-        i += 1;
-        if (i > 20) {
-            console.log(1000.0 / dt);
-            i = 0;
-        }
+        // i += 1;
+        // if (i > 20) {
+        //     console.log(1000.0 / dt);
+        //     i = 0;
+        // }
 
         while (accumulator > period) {
             loop.update(period);
