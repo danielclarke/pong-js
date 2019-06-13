@@ -84,6 +84,8 @@ class Player {
 
 class Ball {
     constructor(x, y, colour) {
+        this.start_x = x;
+        this.start_y = y;
         this.x = x;
         this.y = y;
         this.dx = 0;
@@ -105,6 +107,14 @@ class Ball {
             this.dx = 5;
             this.dy = Math.random() * 5 - 2.5;
         }
+    }
+
+    reset () {
+        this.served = false;
+        this.dx = 0;
+        this.dy = 0;
+        this.x = this.start_x;
+        this.y = this.start_y;
     }
 }
 
@@ -154,7 +164,7 @@ class Loop {
 
     update(dt) {
 
-        let paddleSpeed = dt / 4;
+        let paddleSpeed = dt / 3;
 
         if (this.p1.state === this.p1.states()["up"]) {
             this.p1.dy = - paddleSpeed;
@@ -226,11 +236,13 @@ class Loop {
             this.ball.dy = - this.ball.dy * 0.9;
         } 
         if (this.ball.x < 0) {
-            this.ball.x = 0;
-            this.ball.dx = - this.ball.dx * 0.9;
+            this.ball.reset();
+            // this.ball.x = 0;
+            // this.ball.dx = - this.ball.dx * 0.9;
         } else if (canvas.width < this.ball.x + this.ball.width) {
-            this.ball.x = canvas.width - this.ball.width;
-            this.ball.dx = - this.ball.dx * 0.9;
+            this.ball.reset();
+            // this.ball.x = canvas.width - this.ball.width;
+            // this.ball.dx = - this.ball.dx * 0.9;
         }
 
         if (this.ball.dy < -5) {
