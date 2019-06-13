@@ -103,6 +103,7 @@ class Ball {
         if (this.served === false) {
             this.served = true;
             this.dx = 5;
+            this.dy = Math.random() * 5 - 2.5;
         }
     }
 }
@@ -110,9 +111,9 @@ class Ball {
 class Loop {
     constructor() {
 
-        this.p1 = new Player(0, 0, "magenta");
-        this.p2 = new Player(canvas.width - paddleWidth, canvas.height - paddleHeight, "cyan");
-        this.ball = new Ball(canvas.width / 2, canvas.height / 2, "yellow");
+        this.p1 = new Player(0, 0, "#FF1B0F");
+        this.p2 = new Player(canvas.width - paddleWidth, canvas.height - paddleHeight, "#E10D92");
+        this.ball = new Ball(canvas.width / 2, canvas.height / 2, "#B1F70E");
 
         kdCallbacks['space'] = (evt) => this.ball.serve();
 
@@ -232,10 +233,20 @@ class Loop {
             this.ball.dx = - this.ball.dx * 0.9;
         }
 
+        if (this.ball.dy < -5) {
+            this.ball.dy = -5;
+        }
+        if (this.ball.dy > 5) {
+            this.ball.dy = 5;
+        }
+
     }
 
     render() {
         context.clearRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = "#2B294B";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
         context.fillStyle = this.p1.colour;
         context.fillRect(this.p1.x, this.p1.y, this.p1.width, this.p1.height);
         context.fillStyle = this.p2.colour;
