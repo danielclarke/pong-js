@@ -180,12 +180,12 @@ class Loop {
         //     this.p2.dy = 0;
         // }
 
-        if (this.p2.y + this.p2.height / 2 < this.ball.y + 2 * this.ball.height / 3) {
+        if (this.p2.y + 2 * this.p2.height / 3 < this.ball.y) {
             this.p2.dy = paddleSpeed;
-        }
-
-        if (this.ball.y + this.ball.height / 3 < this.p2.y + this.p2.height / 2) {
+        } else if (this.ball.y + this.ball.height < this.p2.y + this.p2.height / 3) {
             this.p2.dy = - paddleSpeed;
+        } else {
+            this.p2.dy = 0;
         }
 
         this.p2.y += this.p2.dy;
