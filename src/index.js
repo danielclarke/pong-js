@@ -247,8 +247,9 @@ class Loop {
 
     update(dt) {
 
-        const paddleSpeed = dt / 4;
-        const ballSpeed = paddleSpeed * 1.1;
+        const paddleSpeed = dt / 3;
+        const maxBallSpeed = paddleSpeed * 4;
+        const minBallSpeed = paddleSpeed * 1;
         const padding = 10;
 
         if (this.p1_playing) {
@@ -286,15 +287,17 @@ class Loop {
         let p2AABB = new AABB(new Point(this.p2.x, this.p2.y), this.p2.width, this.p2.height);
 
         if (ballAABB.intersects(p1AABB) && this.ball.dx < 0) {
-            this.ball.dx = - this.ball.dx * 1.05;
-            this.ball.dy += this.p1.dy;
+            this.ball.dx = Math.max(-1.05 * this.ball.dx, maxBallSpeed);
+            // this.ball.dx = this.ball.dx * 1.05;
+            this.ball.dy += this.p1.dy + (Math.random() - 0.5) / 10.0;
             if (this.ball.x < this.p1.x + this.p1.width) {
                 this.ball.x = this.p1.x + this.p1.width;
             }
         }
         if (ballAABB.intersects(p2AABB) && 0 < this.ball.dx) {
-            this.ball.dx = - this.ball.dx * 1.05;
-            this.ball.dy += this.p2.dy;
+            this.ball.dx = Math.min(-1.05 * this.ball.dx, -maxBallSpeed);
+            // this.ball.dx = - this.ball.dx * 1.05;
+            this.ball.dy += this.p2.dy + (Math.random() - 0.5) / 10.0;
             if (this.p2.x - this.ball.width < this.ball.x) {
                 this.ball.x = this.p2.x - this.ball.width;
             }
@@ -315,7 +318,7 @@ class Loop {
             if (this.is_game_over()) {
                 this.game_over();
             }
-        } else if (canvas.width < this.ball.x - 4 * this.ball.width) {
+        } else if (canvas.width < this.ball.x - 3 * this.ball.width) {
             // this.ball.reset();
             this.p1_score += 1;
             this.ball.x = canvas.width - this.ball.width;
@@ -329,11 +332,17 @@ class Loop {
             this.ball.reset();
         }
 
-        if (this.ball.dy < -ballSpeed) {
-            this.ball.dy = -ballSpeed;
+        this.ball.dx = this.ball.dx * (1 - 0.3 / dt);
+        this.ball.dy = this.ball.dy * (1 - 0.3 / dt);
+
+        this.ball.dy = Math.max(-paddleSpeed * 1.05, this.ball.dy);
+        this.ball.dy = Math.min(paddleSpeed * 1.05, this.ball.dy);
+
+        if (this.ball.dx < 0 && -minBallSpeed < this.ball.dx) {
+            this.ball.dx = -minBallSpeed;
         }
-        if (this.ball.dy > ballSpeed) {
-            this.ball.dy = ballSpeed;
+        if (0 < this.ball.dx && this.ball.dx < minBallSpeed) {
+            this.ball.dx = minBallSpeed;
         }
     }
 
@@ -355,8 +364,8 @@ class Loop {
             Math.floor(this.ball.y),
         );
         context.fillStyle = "White"
-        context.font = "10px Courier New";
-        context.fillText(`${this.p1_score} - ${this.p2_score}`, canvas.width / 2 - 10, 10);
+        context.font = "25px Courier New";
+        context.fillText(`${this.p1_score} - ${this.p2_score}`, canvas.width / 2 - 33, 30);
         if (this.is_game_over()) {
             context.font = "48px Courier New";
             context.fillText(`GAME OVER`, canvas.width / 2 - 125, canvas.height / 2 - 60);        
