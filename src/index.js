@@ -355,10 +355,10 @@ class Loop {
             Math.floor(this.ball.y),
         );
         context.fillStyle = "White"
-        context.font = "25px Courier New";
+        context.font = "bold 25px Courier New";
         context.fillText(`${this.p1_score} - ${this.p2_score}`, canvas.width / 2 - 33, 30);
         if (this.is_game_over()) {
-            context.font = "48px Courier New";
+            context.font = "bold 48px Courier New";
             context.fillText(`GAME OVER`, canvas.width / 2 - 125, canvas.height / 2 - 60);        
         }
     }
