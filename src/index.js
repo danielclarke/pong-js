@@ -285,14 +285,14 @@ class Loop {
         let p1AABB = new AABB(new Point(this.p1.x, this.p1.y), this.p1.width, this.p1.height);
         let p2AABB = new AABB(new Point(this.p2.x, this.p2.y), this.p2.width, this.p2.height);
 
-        if (ballAABB.intersects(p1AABB)) {
+        if (ballAABB.intersects(p1AABB) && this.ball.dx < 0) {
             this.ball.dx = - this.ball.dx * 1.05;
             this.ball.dy += this.p1.dy;
             if (this.ball.x < this.p1.x + this.p1.width) {
                 this.ball.x = this.p1.x + this.p1.width;
             }
         }
-        if (ballAABB.intersects(p2AABB)) {
+        if (ballAABB.intersects(p2AABB) && 0 < this.ball.dx) {
             this.ball.dx = - this.ball.dx * 1.05;
             this.ball.dy += this.p2.dy;
             if (this.p2.x - this.ball.width < this.ball.x) {
