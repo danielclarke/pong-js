@@ -94,6 +94,8 @@ class Ball {
         this.height = 10;
         this.colour = colour;
         this.served = false;
+        this.image = new Image();
+        this.image.src = '/assets/imgs/ball.png';
     }
 
     update() {
@@ -121,11 +123,18 @@ class Ball {
 class Loop {
     constructor() {
 
-        this.p1 = new Player(0, 0, "#FF1B0F");
-        this.p2 = new Player(canvas.width - paddleWidth, canvas.height - paddleHeight, "#E10D92");
+        this.p1 = new Player(10, 0, "#FF1B0F");
+        this.p2 = new Player(canvas.width - paddleWidth - 10, canvas.height - paddleHeight, "#E10D92");
+        this.p1_score = 0;
+        this.p2_score = 0;
         this.ball = new Ball(canvas.width / 2, canvas.height / 2, "#B1F70E");
 
-        kdCallbacks['space'] = (evt) => this.ball.serve();
+        kdCallbacks['space'] = (evt) => {
+            if (this.game_over()) {
+                this.reset();
+            }
+            this.ball.serve();
+        }
 
         kdCallbacks['w'] = (evt) => this.p1_up(evt);
         kdCallbacks['s'] = (evt) => this.p1_down(evt);
@@ -162,9 +171,32 @@ class Loop {
         this.p2.state = this.p2.states()["stop"];
     }
 
+    reset() {
+        this.p1_score = 0;
+        this.p2_score = 0;
+    }
+
+    game_over() {
+        if (this.p1_score === 10 || this.p2_score === 10) {
+            return true;
+        }
+        return false;
+    }
+
+    get_winner() {
+        if (this.p1_score === 10) {
+            return this.p1;
+        }
+        if (this.p2_score === 10) {
+            return this.p2;
+        }
+        return null;
+    }
+
     update(dt) {
 
-        let paddleSpeed = 4.4;
+        const paddleSpeed = dt / 3;
+        const padding = 10;
 
         if (this.p1.state === this.p1.states()["up"]) {
             this.p1.dy = - paddleSpeed;
@@ -176,11 +208,11 @@ class Loop {
 
         this.p1.y += this.p1.dy;
         
-        if (canvas.height - paddleHeight < this.p1.y) {
-            this.p1.y = canvas.height - paddleHeight;
+        if (canvas.height - paddleHeight - padding < this.p1.y) {
+            this.p1.y = canvas.height - paddleHeight - padding;
         }
-        if (this.p1.y < 0) {
-            this.p1.y = 0;
+        if (this.p1.y < 0 + padding) {
+            this.p1.y = 0 + padding;
         }
 
         // if (this.p2.state === this.p2.states()["up"]) {
@@ -200,11 +232,11 @@ class Loop {
         }
 
         this.p2.y += this.p2.dy;
-        if (canvas.height - paddleHeight < this.p2.y) {
-            this.p2.y = canvas.height - paddleHeight;
+        if (canvas.height - paddleHeight - padding< this.p2.y) {
+            this.p2.y = canvas.height - paddleHeight - padding;
         }
-        if (this.p2.y < 0) {
-            this.p2.y = 0;
+        if (this.p2.y < 0 + padding) {
+            this.p2.y = 0 + padding;
         }
 
         this.ball.update();
@@ -235,14 +267,20 @@ class Loop {
             this.ball.y = canvas.height - this.ball.height;
             this.ball.dy = - this.ball.dy * 0.9;
         } 
-        if (this.ball.x + this.ball.width < 0) {
+        if (this.ball.x + 4 * this.ball.width < 0) {
+            // this.ball.reset();
+            this.p2_score += 1;
+            this.ball.x = 0;
+            this.ball.dx = - this.ball.dx * 0.9;
+        } else if (canvas.width < this.ball.x - 4 * this.ball.width) {
+            // this.ball.reset();
+            this.p1_score += 1;
+            this.ball.x = canvas.width - this.ball.width;
+            this.ball.dx = - this.ball.dx * 0.9;
+        }
+
+        if (this.game_over()) {
             this.ball.reset();
-            // this.ball.x = 0;
-            // this.ball.dx = - this.ball.dx * 0.9;
-        } else if (canvas.width < this.ball.x) {
-            this.ball.reset();
-            // this.ball.x = canvas.width - this.ball.width;
-            // this.ball.dx = - this.ball.dx * 0.9;
         }
 
         if (this.ball.dy < -5) {
@@ -255,16 +293,24 @@ class Loop {
     }
 
     render() {
-        // context.clearRect(0, 0, canvas.width, canvas.height);
         context.fillStyle = "#2B294B";
         context.fillRect(0, 0, canvas.width, canvas.height);
 
         context.fillStyle = this.p1.colour;
-        context.fillRect(Math.floor(this.p1.x), Math.floor(this.p1.y), this.p1.width, this.p1.height);
+        context.fillRect(this.p1.x, this.p1.y, this.p1.width, this.p1.height);
         context.fillStyle = this.p2.colour;
-        context.fillRect(Math.floor(this.p2.x), Math.floor(this.p2.y), this.p2.width, this.p2.height);
-        context.fillStyle = this.ball.colour;
-        context.fillRect(Math.floor(this.ball.x), Math.floor(this.ball.y), this.ball.width, this.ball.height);
+        context.fillRect(this.p2.x, this.p2.y, this.p2.width, this.p2.height);
+        context.drawImage(
+            this.ball.image,
+            this.ball.x, this.ball.y,
+        );
+        context.fillStyle = "White"
+        context.font = "10px Courier New";
+        context.fillText(`${this.p1_score} - ${this.p2_score}`, canvas.width / 2 - 10, 10);
+        if (this.game_over()) {
+            context.font = "48px Courier New";
+            context.fillText(`GAME OVER`, canvas.width / 2 - 125, canvas.height / 2 - 60);        
+        }
     }
 }
 
