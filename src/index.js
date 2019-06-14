@@ -228,7 +228,7 @@ class Loop {
     }
 
     is_game_over() {
-        const max_score = 5;
+        const max_score = 11;
         if (this.p1_score === max_score || this.p2_score === max_score) {
             return true;
         }
