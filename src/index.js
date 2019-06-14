@@ -338,16 +338,21 @@ class Loop {
     }
 
     render() {
+
+        // make sure objects are rendered at integer coordinates to help stop tearing
+        // https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas#Avoid_floating-point_coordinates_and_use_integers_instead
+        
         context.fillStyle = "#2B294B";
         context.fillRect(0, 0, canvas.width, canvas.height);
 
         context.fillStyle = this.p1.colour;
-        context.fillRect(this.p1.x, this.p1.y, this.p1.width, this.p1.height);
+        context.fillRect(Math.floor(this.p1.x), Math.floor(this.p1.y), this.p1.width, this.p1.height);
         context.fillStyle = this.p2.colour;
-        context.fillRect(this.p2.x, this.p2.y, this.p2.width, this.p2.height);
+        context.fillRect(Math.floor(this.p2.x), Math.floor(this.p2.y), this.p2.width, this.p2.height);
         context.drawImage(
             this.ball.image,
-            this.ball.x, this.ball.y,
+            Math.floor(this.ball.x), 
+            Math.floor(this.ball.y),
         );
         context.fillStyle = "White"
         context.font = "10px Courier New";
