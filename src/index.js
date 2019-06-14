@@ -95,7 +95,7 @@ class Ball {
         this.colour = colour;
         this.served = false;
         this.image = new Image();
-        this.image.src = '/assets/imgs/ball.png';
+        this.image.src = 'assets/imgs/ball.png';
     }
 
     update() {
