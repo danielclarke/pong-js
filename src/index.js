@@ -127,6 +127,10 @@ class Loop {
         this.p1_playing = false;
         this.p2_playing = false;
 
+        this.scoreSound = new Audio("assets/sounds/score.wav");
+        this.paddleHitSound = new Audio("assets/sounds/paddle_hit.wav");
+        this.wallHitSound = new Audio("assets/sounds/wall_hit.wav");
+
         this.p1 = new Player(10, 0, "#FF1B0F");
         this.p2 = new Player(canvas.width - paddleWidth - 10, canvas.height - paddleHeight, "#E10D92");
         this.p1_score = 0;
@@ -291,6 +295,7 @@ class Loop {
             if (this.ball.x < this.p1.x + this.p1.width) {
                 this.ball.x = this.p1.x + this.p1.width;
             }
+            this.paddleHitSound.play();
         }
         if (ballAABB.intersects(p2AABB) && 0 < this.ball.dx) {
             this.ball.dx = - this.ball.dx * 1.05;
@@ -298,17 +303,21 @@ class Loop {
             if (this.p2.x - this.ball.width < this.ball.x) {
                 this.ball.x = this.p2.x - this.ball.width;
             }
+            this.paddleHitSound.play();
         }
 
         if (this.ball.y < 0) {
             this.ball.y = 0;
             this.ball.dy = - this.ball.dy * 0.9;
+            this.wallHitSound.play();
         } else if (canvas.height < this.ball.y + this.ball.height) {
             this.ball.y = canvas.height - this.ball.height;
             this.ball.dy = - this.ball.dy * 0.9;
+            this.wallHitSound.play();
         } 
         if (this.ball.x + 4 * this.ball.width < 0) {
             // this.ball.reset();
+            this.scoreSound.play();
             this.p2_score += 1;
             this.ball.x = 0;
             this.ball.dx = - this.ball.dx * 0.9;
@@ -317,6 +326,7 @@ class Loop {
             }
         } else if (canvas.width < this.ball.x - 4 * this.ball.width) {
             // this.ball.reset();
+            this.scoreSound.play();
             this.p1_score += 1;
             this.ball.x = canvas.width - this.ball.width;
             this.ball.dx = - this.ball.dx * 0.9;
