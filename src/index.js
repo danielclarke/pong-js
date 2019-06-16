@@ -82,6 +82,9 @@ class Loop {
         this.p1_score = 0;
         this.p2_score = 0;
         this.ball = new Ball(canvas.width / 2, canvas.height / 2, "#B1F70E");
+        
+        this.grassImage = new Image();
+        this.grassImage.src = 'assets/imgs/grass4.png';
 
         this.initKeyboard();
     }
@@ -261,20 +264,20 @@ class Loop {
             this.wallHitSound.play();
         } 
         if (this.ball.x + 4 * this.ball.width < 0) {
-            // this.ball.reset();
+            this.ball.reset();
             this.scoreSound.play();
             this.p2_score += 1;
-            this.ball.x = 0;
-            this.ball.dx = - this.ball.dx * 0.9;
+            // this.ball.x = 0;
+            // this.ball.dx = - this.ball.dx * 0.9;
             if (this.is_game_over()) {
                 this.game_over();
             }
         } else if (canvas.width < this.ball.x - 4 * this.ball.width) {
-            // this.ball.reset();
+            this.ball.reset();
             this.scoreSound.play();
             this.p1_score += 1;
-            this.ball.x = canvas.width - this.ball.width;
-            this.ball.dx = - this.ball.dx * 0.9;
+            // this.ball.x = canvas.width - this.ball.width;
+            // this.ball.dx = - this.ball.dx * 0.9;
             if (this.is_game_over()) {
                 this.game_over();
             }
@@ -297,8 +300,18 @@ class Loop {
         // make sure objects are rendered at integer coordinates to help stop tearing
         // https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas#Avoid_floating-point_coordinates_and_use_integers_instead
         
-        context.fillStyle = "#2B294B";
-        context.fillRect(0, 0, canvas.width, canvas.height);
+        // context.fillStyle = "#2B294B";
+        // context.fillRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < canvas.width; i+=8) {
+            for (let j = 0; j < canvas.height; j+=7) {
+                context.drawImage(
+                    this.grassImage,
+                    i,
+                    j
+                );
+            }
+        }
 
         context.fillStyle = this.p1.colour;
         context.fillRect(Math.floor(this.p1.x), Math.floor(this.p1.y), this.p1.width, this.p1.height);
@@ -309,6 +322,7 @@ class Loop {
             Math.floor(this.ball.x), 
             Math.floor(this.ball.y),
         );
+
         context.fillStyle = "White"
         context.font = "bold 25px Courier New";
         context.fillText(`${this.p1_score} - ${this.p2_score}`, canvas.width / 2 - 33, 30);
