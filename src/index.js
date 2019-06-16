@@ -82,29 +82,33 @@ class Loop {
         this.p1_score = 0;
         this.p2_score = 0;
         this.ball = new Ball(canvas.width / 2, canvas.height / 2, "#B1F70E");
-        
+
+        this.initKeyboard();
+    }
+
+    initKeyboard() {
         let keyboardHandler = new KeyboardHandler();
         keyboardHandler.addKeyDownHandler('w', 
             (evt) => {
                 if (this.game_started === false) {
                     this.p1_playing = true;
                 }
-                this.p1_up(evt);
+                this.p1.state = this.p1.states()["up"];
             }
         )
         keyboardHandler.addKeyUpHandler('w', 
-            (evt) => this.p1_stop(evt)
+            (evt) => this.p1.state = this.p1.states()["stop"]
         )
         keyboardHandler.addKeyDownHandler('s', 
             (evt) => {
                 if (this.game_started === false) {
                     this.p1_playing = true;
                 }
-                this.p1_down(evt);
+                this.p1.state = this.p1.states()["down"];
             }
         )
         keyboardHandler.addKeyUpHandler('s', 
-            (evt) => this.p1_stop(evt)
+            (evt) => this.p1.state = this.p1.states()["stop"]
         )
 
         keyboardHandler.addKeyDownHandler('up', 
@@ -112,22 +116,22 @@ class Loop {
                 if (this.game_started === false) {
                     this.p2_playing = true;
                 }
-                this.p2_up(evt);
+                this.p2.state = this.p2.states()["up"];
             }
         )
         keyboardHandler.addKeyUpHandler('up', 
-            (evt) => this.p2_stop(evt)
+            (evt) => this.p2.state = this.p2.states()["stop"]
         )
         keyboardHandler.addKeyDownHandler('down', 
             (evt) => {
                 if (this.game_started === false) {
                     this.p2_playing = true;
                 }
-                this.p2_down(evt);
+                this.p2.state = this.p2.states()["down"];
             }
         )
         keyboardHandler.addKeyUpHandler('down', 
-            (evt) => this.p2_stop(evt)
+            (evt) => this.p2.state = this.p2.states()["stop"]
         )
 
         keyboardHandler.addKeyDownHandler('space',
@@ -138,30 +142,6 @@ class Loop {
                 this.ball.serve();
             }
         )
-    }
-
-    p1_up(evt) {
-        this.p1.state = this.p1.states()["up"];
-    }
-
-    p1_down(evt) {
-        this.p1.state = this.p1.states()["down"];
-    }
-
-    p1_stop(evt) {
-        this.p1.state = this.p1.states()["stop"];
-    }
-
-    p2_up(evt) {
-        this.p2.state = this.p2.states()["up"];
-    }
-
-    p2_down(evt) {
-        this.p2.state = this.p2.states()["down"];
-    }
-
-    p2_stop(evt) {
-        this.p2.state = this.p2.states()["stop"];
     }
 
     ai_update(player, paddleSpeed) {
