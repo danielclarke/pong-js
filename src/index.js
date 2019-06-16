@@ -1,4 +1,5 @@
 import AABB, {Point} from "./aabb.js";
+import KeyboardHandler from "./keyboard-handler.js"
 
 const canvas = document.getElementById('canvas');
 const context = canvas.getContext('2d');
@@ -6,61 +7,6 @@ const FPS = 60;
 const paddleWidth = 10;
 const paddleHeight = 30;
 let loop;
-
-let kdCallbacks = {};
-let kuCallbacks = {};
-let pressedKeys = {};
-
-export let keyMap = {
-    // named keys
-    13: 'enter',
-    27: 'esc',
-    32: 'space',
-    37: 'left',
-    38: 'up',
-    39: 'right',
-    40: 'down'
-};
-
-function keydownEventHandler(evt) {
-    let key = keyMap[evt.which];
-    pressedKeys[key] = true;
-    
-    if (kdCallbacks[key]) {
-        kdCallbacks[key](evt);
-    }
-}
-
-function keyupEventHandler(evt) {    
-    let key = keyMap[evt.which];
-    pressedKeys[key] = false;
-    
-    if (kuCallbacks[key]) {
-        kuCallbacks[key](evt);
-    }
-}
-
-export function initKeys() {
-    let i;
-    
-    // alpha keys
-    // @see https://stackoverflow.com/a/43095772/2124254
-    for (i = 0; i < 26; i++) {
-        // rollupjs considers this a side-effect (for now), so we'll do it in the
-        // initKeys function
-        // @see https://twitter.com/lukastaegert/status/1107011988515893249?s=20
-        keyMap[65+i] = (10 + i).toString(36);
-    }
-    
-    // numeric keys
-    for (i = 0; i < 10; i++) {
-        keyMap[48+i] = ''+i;
-    }
-    
-    window.addEventListener('keydown', keydownEventHandler);
-    window.addEventListener('keyup', keyupEventHandler);
-    // window.addEventListener('blur', blurEventHandler);
-}
 
 class Player {
     states() {
@@ -136,43 +82,62 @@ class Loop {
         this.p1_score = 0;
         this.p2_score = 0;
         this.ball = new Ball(canvas.width / 2, canvas.height / 2, "#B1F70E");
+        
+        let keyboardHandler = new KeyboardHandler();
+        keyboardHandler.addKeyDownHandler('w', 
+            (evt) => {
+                if (this.game_started === false) {
+                    this.p1_playing = true;
+                }
+                this.p1_up(evt);
+            }
+        )
+        keyboardHandler.addKeyUpHandler('w', 
+            (evt) => this.p1_stop(evt)
+        )
+        keyboardHandler.addKeyDownHandler('s', 
+            (evt) => {
+                if (this.game_started === false) {
+                    this.p1_playing = true;
+                }
+                this.p1_down(evt);
+            }
+        )
+        keyboardHandler.addKeyUpHandler('s', 
+            (evt) => this.p1_stop(evt)
+        )
 
-        kdCallbacks['space'] = (evt) => {
-            if (this.is_game_over()) {
-                this.reset();
+        keyboardHandler.addKeyDownHandler('up', 
+            (evt) => {
+                if (this.game_started === false) {
+                    this.p2_playing = true;
+                }
+                this.p2_up(evt);
             }
-            this.ball.serve();
-        }
+        )
+        keyboardHandler.addKeyUpHandler('up', 
+            (evt) => this.p2_stop(evt)
+        )
+        keyboardHandler.addKeyDownHandler('down', 
+            (evt) => {
+                if (this.game_started === false) {
+                    this.p2_playing = true;
+                }
+                this.p2_down(evt);
+            }
+        )
+        keyboardHandler.addKeyUpHandler('down', 
+            (evt) => this.p2_stop(evt)
+        )
 
-        kdCallbacks['w'] = (evt) => {
-            if (this.game_started === false) {
-                this.p1_playing = true;
+        keyboardHandler.addKeyDownHandler('space',
+            (evt) => {
+                if (!this.game_started) {
+                    this.reset();
+                }
+                this.ball.serve();
             }
-            this.p1_up(evt);
-        }
-        kdCallbacks['s'] = (evt) => {
-            if (this.game_started === false) {
-                this.p1_playing = true;
-            }
-            this.p1_down(evt);
-        }
-        kuCallbacks['w'] = (evt) => this.p1_stop(evt);
-        kuCallbacks['s'] = (evt) => this.p1_stop(evt);
-
-        kdCallbacks['up'] = (evt) => {
-            if (this.game_started === false) {
-                this.p2_playing = true;
-            }
-            this.p2_up(evt);
-        }
-        kdCallbacks['down'] = (evt) => {
-            if (this.game_started === false) {
-                this.p2_playing = true;
-            }
-            this.p2_down(evt);
-        }
-        kuCallbacks['up'] = (evt) => this.p2_stop(evt);
-        kuCallbacks['down'] = (evt) => this.p2_stop(evt);
+        )
     }
 
     p1_up(evt) {
@@ -375,7 +340,6 @@ class Loop {
 }
 
 function init() {
-    initKeys();
     loop = new Loop();
 }
 
