@@ -5,9 +5,9 @@ const canvas = document.getElementById('main-layer');
 const context = canvas.getContext('2d');
 
 let bgCanvas = document.createElement('canvas');
+let bgContext = bgCanvas.getContext('2d');
 bgCanvas.width = canvas.width;
 bgCanvas.height = canvas.height;
-let bgContext = bgCanvas.getContext('2d');
 
 const FPS = 60;
 const paddleWidth = 10;
@@ -93,22 +93,25 @@ class Loop {
         this.grassImage = new Image();
         this.grassImage.src = 'assets/imgs/grass.png';
 
+        // this.grassImages = [new Image(), new Image(), new Image()];
+        // this.grassImages[0].src = 'assets/imgs/grass1.png';
+        // this.grassImages[1].src = 'assets/imgs/grass2.png';
+        // this.grassImages[2].src = 'assets/imgs/grass3.png';
+
         this.initKeyboard();
 
-        // let drawBg = () => {
-        //     for (let i = 0; i < canvas.width; i+=8) {
-        //         for (let j = 0; j < canvas.height; j+=7) {
-        //             bgContext.drawImage(
-        //                 this.grassImage,
-        //                 i,
-        //                 j
-        //             );
-        //         }
-        //     }
-
-        //     // context.drawImage(bgCanvas, 0, 0);
-        // }
-        // requestAnimationFrame(drawBg);
+        this.grassImage.onload = () => {
+            for (let i = 0; i < canvas.width; i+=7) {
+                for (let j = 0; j < canvas.height; j+=7) {
+                    bgContext.drawImage(
+                        this.grassImage,
+                        i,
+                        j
+                    );
+                }
+            }
+            context.drawImage(bgCanvas, 0, 0);
+        }
     }
 
     initKeyboard() {
@@ -337,16 +340,15 @@ class Loop {
         // context.fillStyle = "#2B294B";
         // context.fillRect(0, 0, canvas.width, canvas.height);
 
-        for (let i = 0; i < canvas.width; i+=7) {
-            for (let j = 0; j < canvas.height; j+=7) {
-                bgContext.drawImage(
-                    this.grassImage,
-                    i,
-                    j
-                );
-            }
-        }
-
+        // for (let i = 0; i < canvas.width; i+=7) {
+        //     for (let j = 0; j < canvas.height; j+=7) {
+        //         bgContext.drawImage(
+        //             this.grassImage,
+        //             i,
+        //             j
+        //         );
+        //     }
+        // }
         context.drawImage(bgCanvas, 0, 0);
 
         context.fillStyle = this.p1.colour;
@@ -373,12 +375,10 @@ function init() {
     loop = new Loop();
 }
 
-function animator() {
+function animator(loop) {
     const period = 1000.0 / FPS;
     let accumulator = 0;
     let last = 0;
-
-    let i = 0;
 
     function _dt() {
         let now = performance.now();
@@ -393,11 +393,6 @@ function animator() {
         let dt = _dt();
 
         accumulator += dt;
-        // i += 1;
-        // if (i > 20) {
-        //     console.log(1000.0 / dt);
-        //     i = 0;
-        // }
 
         while (accumulator > period) {
             loop.update(period);
@@ -411,4 +406,4 @@ function animator() {
 }
 
 init();
-animator()();
+animator(loop)();
