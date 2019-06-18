@@ -1,8 +1,10 @@
 import AABB, {Point} from "./aabb.js";
 import KeyboardHandler from "./keyboard-handler.js"
 
-const canvas = document.getElementById('main-layer');
-const context = canvas.getContext('2d');
+let canvas = document.getElementById('main-layer');
+let context = canvas.getContext('2d');
+// canvas.width = window.innerWidth;
+// canvas.height = window.innerHeight;
 
 let bgCanvas = document.createElement('canvas');
 let bgContext = bgCanvas.getContext('2d');
@@ -83,6 +85,7 @@ class Loop {
         this.scoreSound = new Audio("assets/sounds/score.wav");
         this.paddleHitSound = new Audio("assets/sounds/paddle_hit.wav");
         this.wallHitSound = new Audio("assets/sounds/wall_hit.wav");
+        this.gameOverSound = new Audio("assets/sounds/game_over.wav");
 
         this.p1 = new Player(10, 0, "#FF1B0F");
         this.p2 = new Player(canvas.width - paddleWidth - 10, canvas.height - paddleHeight, "#E10D92");
@@ -110,6 +113,7 @@ class Loop {
                     );
                 }
             }
+            // context.scale(window.screen.availWidth / canvas.width, window.screen.availHeight / canvas.height);
             context.drawImage(bgCanvas, 0, 0);
         }
     }
@@ -199,6 +203,7 @@ class Loop {
     }
 
     game_over() {
+        this.gameOverSound.play();
         this.p1_playing = false;
         this.p2_playing = false;
         this.game_started = false;
