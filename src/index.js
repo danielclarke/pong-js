@@ -91,7 +91,7 @@ class Loop {
         this.ball = new Ball(canvas.width / 2, canvas.height / 2, "#B1F70E");
         
         this.grassImage = new Image();
-        this.grassImage.src = 'assets/imgs/grass4.png';
+        this.grassImage.src = 'assets/imgs/grass.png';
 
         this.initKeyboard();
 
@@ -337,7 +337,7 @@ class Loop {
         // context.fillStyle = "#2B294B";
         // context.fillRect(0, 0, canvas.width, canvas.height);
 
-        for (let i = 0; i < canvas.width; i+=8) {
+        for (let i = 0; i < canvas.width; i+=7) {
             for (let j = 0; j < canvas.height; j+=7) {
                 bgContext.drawImage(
                     this.grassImage,
