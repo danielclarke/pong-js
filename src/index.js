@@ -1,8 +1,14 @@
 import AABB, {Point} from "./aabb.js";
 import KeyboardHandler from "./keyboard-handler.js"
 
-const canvas = document.getElementById('canvas');
+const canvas = document.getElementById('main-layer');
 const context = canvas.getContext('2d');
+
+let bgCanvas = document.createElement('canvas');
+bgCanvas.width = canvas.width;
+bgCanvas.height = canvas.height;
+let bgContext = bgCanvas.getContext('2d');
+
 const FPS = 60;
 const paddleWidth = 10;
 const paddleHeight = 30;
@@ -72,6 +78,7 @@ class Loop {
         this.game_started = false;
         this.p1_playing = false;
         this.p2_playing = false;
+        this.keyboardHandler = new KeyboardHandler();
 
         this.scoreSound = new Audio("assets/sounds/score.wav");
         this.paddleHitSound = new Audio("assets/sounds/paddle_hit.wav");
@@ -87,11 +94,26 @@ class Loop {
         this.grassImage.src = 'assets/imgs/grass4.png';
 
         this.initKeyboard();
+
+        // let drawBg = () => {
+        //     for (let i = 0; i < canvas.width; i+=8) {
+        //         for (let j = 0; j < canvas.height; j+=7) {
+        //             bgContext.drawImage(
+        //                 this.grassImage,
+        //                 i,
+        //                 j
+        //             );
+        //         }
+        //     }
+
+        //     // context.drawImage(bgCanvas, 0, 0);
+        // }
+        // requestAnimationFrame(drawBg);
     }
 
     initKeyboard() {
-        let keyboardHandler = new KeyboardHandler();
-        keyboardHandler.addKeyDownHandler('w', 
+        
+        this.keyboardHandler.addKeyDownHandler('w', 
             (evt) => {
                 if (this.game_started === false) {
                     this.p1_playing = true;
@@ -99,10 +121,10 @@ class Loop {
                 this.p1.state = this.p1.states()["up"];
             }
         )
-        keyboardHandler.addKeyUpHandler('w', 
+        this.keyboardHandler.addKeyUpHandler('w', 
             (evt) => this.p1.state = this.p1.states()["stop"]
         )
-        keyboardHandler.addKeyDownHandler('s', 
+        this.keyboardHandler.addKeyDownHandler('s', 
             (evt) => {
                 if (this.game_started === false) {
                     this.p1_playing = true;
@@ -110,11 +132,11 @@ class Loop {
                 this.p1.state = this.p1.states()["down"];
             }
         )
-        keyboardHandler.addKeyUpHandler('s', 
+        this.keyboardHandler.addKeyUpHandler('s', 
             (evt) => this.p1.state = this.p1.states()["stop"]
         )
 
-        keyboardHandler.addKeyDownHandler('up', 
+        this.keyboardHandler.addKeyDownHandler('up', 
             (evt) => {
                 if (this.game_started === false) {
                     this.p2_playing = true;
@@ -122,10 +144,10 @@ class Loop {
                 this.p2.state = this.p2.states()["up"];
             }
         )
-        keyboardHandler.addKeyUpHandler('up', 
+        this.keyboardHandler.addKeyUpHandler('up', 
             (evt) => this.p2.state = this.p2.states()["stop"]
         )
-        keyboardHandler.addKeyDownHandler('down', 
+        this.keyboardHandler.addKeyDownHandler('down', 
             (evt) => {
                 if (this.game_started === false) {
                     this.p2_playing = true;
@@ -133,11 +155,11 @@ class Loop {
                 this.p2.state = this.p2.states()["down"];
             }
         )
-        keyboardHandler.addKeyUpHandler('down', 
+        this.keyboardHandler.addKeyUpHandler('down', 
             (evt) => this.p2.state = this.p2.states()["stop"]
         )
 
-        keyboardHandler.addKeyDownHandler('space',
+        this.keyboardHandler.addKeyDownHandler('space',
             (evt) => {
                 if (!this.game_started) {
                     this.reset();
@@ -204,7 +226,13 @@ class Loop {
         const padding = 10;
 
         if (this.p1_playing) {
-            this.player_update(this.p1, paddleSpeed);
+            if (this.keyboardHandler.pressedKeys['w']) {
+                this.p1.dy = -paddleSpeed;
+            } else if (this.keyboardHandler.pressedKeys['s']) {
+                this.p1.dy = paddleSpeed;    
+            } else {
+                this.p1.dy = 0;        
+            }
         } else {
             this.ai_update(this.p1, paddleSpeed);
         }
@@ -218,7 +246,13 @@ class Loop {
         }
 
         if (this.p2_playing) {
-            this.player_update(this.p2, paddleSpeed);
+            if (this.keyboardHandler.pressedKeys['up']) {
+                this.p2.dy = -paddleSpeed;
+            } else if (this.keyboardHandler.pressedKeys['down']) {
+                this.p2.dy = paddleSpeed;    
+            } else {
+                this.p2.dy = 0;        
+            }
         } else {
             this.ai_update(this.p2, paddleSpeed);
         }
@@ -305,13 +339,15 @@ class Loop {
 
         for (let i = 0; i < canvas.width; i+=8) {
             for (let j = 0; j < canvas.height; j+=7) {
-                context.drawImage(
+                bgContext.drawImage(
                     this.grassImage,
                     i,
                     j
                 );
             }
         }
+
+        context.drawImage(bgCanvas, 0, 0);
 
         context.fillStyle = this.p1.colour;
         context.fillRect(Math.floor(this.p1.x), Math.floor(this.p1.y), this.p1.width, this.p1.height);
