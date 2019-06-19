@@ -1,5 +1,7 @@
 import AABB, {Point} from "./aabb.js";
 import KeyboardHandler from "./keyboard-handler.js"
+import Player from "./player.js"
+import Ball from "./ball.js"
 
 let canvas = document.getElementById('main-layer');
 let context = canvas.getContext('2d');
@@ -15,64 +17,6 @@ const FPS = 60;
 const paddleWidth = 10;
 const paddleHeight = 30;
 let loop;
-
-class Player {
-    states() {
-        return {
-            "stop": 0,
-            "up": 1,
-            "down": 2,
-        }
-    }
-
-    constructor(x, y, colour="black") {
-        this.x = x;
-        this.y = y;
-        this.dy = 0;
-        this.width = paddleWidth;
-        this.height = paddleHeight;
-        this.colour = colour;
-        this.state = this.states()["stop"];
-    }
-}
-
-class Ball {
-    constructor(x, y, colour) {
-        this.start_x = x;
-        this.start_y = y;
-        this.x = x;
-        this.y = y;
-        this.dx = 0;
-        this.dy = 0;
-        this.width = 10;
-        this.height = 10;
-        this.colour = colour;
-        this.served = false;
-        this.image = new Image();
-        this.image.src = 'assets/imgs/ball.png';
-    }
-
-    update() {
-        this.x += this.dx;
-        this.y += this.dy;
-    }
-
-    serve() {
-        if (this.served === false) {
-            this.served = true;
-            this.dx = 5;
-            this.dy = Math.random() * 5 - 2.5;
-        }
-    }
-
-    reset () {
-        this.served = false;
-        this.dx = 0;
-        this.dy = 0;
-        this.x = this.start_x;
-        this.y = this.start_y;
-    }
-}
 
 class Loop {
     constructor() {
@@ -125,23 +69,23 @@ class Loop {
                 if (this.game_started === false) {
                     this.p1_playing = true;
                 }
-                this.p1.state = this.p1.states()["up"];
+                // this.p1.state = this.p1.states()["up"];
             }
         )
-        this.keyboardHandler.addKeyUpHandler('w', 
-            (evt) => this.p1.state = this.p1.states()["stop"]
-        )
+        // this.keyboardHandler.addKeyUpHandler('w', 
+        //     (evt) => this.p1.state = this.p1.states()["stop"]
+        // )
         this.keyboardHandler.addKeyDownHandler('s', 
             (evt) => {
                 if (this.game_started === false) {
                     this.p1_playing = true;
                 }
-                this.p1.state = this.p1.states()["down"];
+                // this.p1.state = this.p1.states()["down"];
             }
         )
-        this.keyboardHandler.addKeyUpHandler('s', 
-            (evt) => this.p1.state = this.p1.states()["stop"]
-        )
+        // this.keyboardHandler.addKeyUpHandler('s', 
+        //     (evt) => this.p1.state = this.p1.states()["stop"]
+        // )
 
         this.keyboardHandler.addKeyDownHandler('up', 
             (evt) => {
@@ -186,15 +130,15 @@ class Loop {
         }
     }
 
-    player_update(player, paddleSpeed) {
-        if (player.state === player.states()["up"]) {
-            player.dy = - paddleSpeed;
-        } else if (player.state === player.states()["down"]) {
-            player.dy = paddleSpeed;
-        } else {
-            player.dy = 0;
-        }
-    }
+    // player_update(player, paddleSpeed) {
+    //     if (player.state === player.states()["up"]) {
+    //         player.dy = - paddleSpeed;
+    //     } else if (player.state === player.states()["down"]) {
+    //         player.dy = paddleSpeed;
+    //     } else {
+    //         player.dy = 0;
+    //     }
+    // }
 
     reset() {
         this.p1_score = 0;
