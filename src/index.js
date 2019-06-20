@@ -36,30 +36,35 @@ class Loop {
         this.p1_score = 0;
         this.p2_score = 0;
         this.ball = new Ball(canvas.width / 2, canvas.height / 2, "#B1F70E");
-        
-        this.grassImage = new Image();
-        this.grassImage.src = 'assets/imgs/grass.png';
 
-        // this.grassImages = [new Image(), new Image(), new Image()];
-        // this.grassImages[0].src = 'assets/imgs/grass1.png';
-        // this.grassImages[1].src = 'assets/imgs/grass2.png';
-        // this.grassImages[2].src = 'assets/imgs/grass3.png';
+        this.grassImages = [new Image(), new Image(), new Image()];
+        this.grassImages[0].src = 'assets/imgs/grass1.png';
+        this.grassImages[1].src = 'assets/imgs/grass2.png';
+        this.grassImages[2].src = 'assets/imgs/grass3.png';
 
-        this.initKeyboard();
-
-        this.grassImage.onload = () => {
+        let numLoaded = 0;
+        const f = () => {
+            numLoaded += 1;
+            if (numLoaded < this.grassImages.length) {
+                return;
+            }
             for (let i = 0; i < canvas.width; i+=7) {
                 for (let j = 0; j < canvas.height; j+=7) {
                     bgContext.drawImage(
-                        this.grassImage,
+                        this.grassImages[Math.floor(Math.random() * 3)],
                         i,
                         j
                     );
                 }
             }
-            // context.scale(window.screen.availWidth / canvas.width, window.screen.availHeight / canvas.height);
             context.drawImage(bgCanvas, 0, 0);
         }
+
+        for (let img of this.grassImages) {
+            img.onload = f;
+        }
+
+        this.initKeyboard();
     }
 
     initKeyboard() {

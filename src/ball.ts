@@ -24,8 +24,8 @@ export default class Ball {
         this.start_y = y;
         this.dx = 0;
         this.dy = 0;
-        this.width = 16;
-        this.height = 16;
+        this.width = 10;
+        this.height = 10;
         this.state = State.Set;
         this.image = new Image();
         this.image.src = 'assets/imgs/ball.png';
