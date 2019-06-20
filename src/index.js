@@ -69,45 +69,29 @@ class Loop {
                 if (this.game_started === false) {
                     this.p1_playing = true;
                 }
-                // this.p1.state = this.p1.states()["up"];
             }
         )
-        // this.keyboardHandler.addKeyUpHandler('w', 
-        //     (evt) => this.p1.state = this.p1.states()["stop"]
-        // )
         this.keyboardHandler.addKeyDownHandler('s', 
             (evt) => {
                 if (this.game_started === false) {
                     this.p1_playing = true;
                 }
-                // this.p1.state = this.p1.states()["down"];
             }
         )
-        // this.keyboardHandler.addKeyUpHandler('s', 
-        //     (evt) => this.p1.state = this.p1.states()["stop"]
-        // )
 
         this.keyboardHandler.addKeyDownHandler('up', 
             (evt) => {
                 if (this.game_started === false) {
                     this.p2_playing = true;
                 }
-                this.p2.state = this.p2.states()["up"];
             }
-        )
-        this.keyboardHandler.addKeyUpHandler('up', 
-            (evt) => this.p2.state = this.p2.states()["stop"]
         )
         this.keyboardHandler.addKeyDownHandler('down', 
             (evt) => {
                 if (this.game_started === false) {
                     this.p2_playing = true;
                 }
-                this.p2.state = this.p2.states()["down"];
             }
-        )
-        this.keyboardHandler.addKeyUpHandler('down', 
-            (evt) => this.p2.state = this.p2.states()["stop"]
         )
 
         this.keyboardHandler.addKeyDownHandler('space',
@@ -120,25 +104,15 @@ class Loop {
         )
     }
 
-    ai_update(player, paddleSpeed) {
+    ai_update(player) {
         if (player.y + 2 * player.height / 3 < this.ball.y) {
-            player.dy = paddleSpeed;
+            player.handleInput("DOWN");
         } else if (this.ball.y + this.ball.height < player.y + player.height / 3) {
-            player.dy = - paddleSpeed;
+            player.handleInput("UP")
         } else {
-            player.dy = 0;
+            player.handleInput("NONE");
         }
     }
-
-    // player_update(player, paddleSpeed) {
-    //     if (player.state === player.states()["up"]) {
-    //         player.dy = - paddleSpeed;
-    //     } else if (player.state === player.states()["down"]) {
-    //         player.dy = paddleSpeed;
-    //     } else {
-    //         player.dy = 0;
-    //     }
-    // }
 
     reset() {
         this.p1_score = 0;
@@ -180,6 +154,8 @@ class Loop {
             } else {
                 this.p1.handleInput("NONE");
             }
+        } else {
+            this.ai_update(this.p1);
         }
         if (this.p2_playing) {
             if (this.keyboardHandler.pressedKeys['up']) {
@@ -189,6 +165,8 @@ class Loop {
             } else {
                 this.p2.handleInput("NONE");
             }
+        } else {
+            this.ai_update(this.p2);
         }
     }
 
@@ -198,16 +176,12 @@ class Loop {
         const ballSpeed = paddleSpeed * 1.1;
         const padding = 10;
 
-        if (this.p1_playing) {
-            if (this.p1.isUp()) {
-                this.p1.dy = -paddleSpeed;
-            } else if(this.p1.isDown()) {
-                this.p1.dy = paddleSpeed;
-            } else {
-                this.p1.dy = 0;
-            }
+        if (this.p1.isUp()) {
+            this.p1.dy = -paddleSpeed;
+        } else if(this.p1.isDown()) {
+            this.p1.dy = paddleSpeed;
         } else {
-            this.ai_update(this.p1, paddleSpeed);
+            this.p1.dy = 0;
         }
 
         this.p1.y += this.p1.dy;
@@ -218,16 +192,12 @@ class Loop {
             this.p1.y = 0 + padding;
         }
 
-        if (this.p2_playing) {
-            if (this.p2.isUp()) {
-                this.p2.dy = -paddleSpeed;
-            } else if(this.p2.isDown()) {
-                this.p2.dy = paddleSpeed;
-            } else {
-                this.p2.dy = 0;
-            }
+        if (this.p2.isUp()) {
+            this.p2.dy = -paddleSpeed;
+        } else if(this.p2.isDown()) {
+            this.p2.dy = paddleSpeed;
         } else {
-            this.ai_update(this.p2, paddleSpeed);
+            this.p2.dy = 0;
         }
 
         this.p2.y += this.p2.dy;
