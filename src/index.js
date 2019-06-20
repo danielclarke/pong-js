@@ -171,6 +171,27 @@ class Loop {
         return null;
     }
 
+    handleInputs() {
+        if (this.p1_playing) {
+            if (this.keyboardHandler.pressedKeys['w']) {
+                this.p1.handleInput("UP");
+            } else if (this.keyboardHandler.pressedKeys['s']) {
+                this.p1.handleInput("DOWN");
+            } else {
+                this.p1.handleInput("NONE");
+            }
+        }
+        if (this.p2_playing) {
+            if (this.keyboardHandler.pressedKeys['up']) {
+                this.p2.handleInput("UP");
+            } else if (this.keyboardHandler.pressedKeys['down']) {
+                this.p2.handleInput("DOWN");
+            } else {
+                this.p2.handleInput("NONE");
+            }
+        }
+    }
+
     update(dt) {
 
         const paddleSpeed = dt / 4;
@@ -178,12 +199,12 @@ class Loop {
         const padding = 10;
 
         if (this.p1_playing) {
-            if (this.keyboardHandler.pressedKeys['w']) {
+            if (this.p1.isUp()) {
                 this.p1.dy = -paddleSpeed;
-            } else if (this.keyboardHandler.pressedKeys['s']) {
-                this.p1.dy = paddleSpeed;    
+            } else if(this.p1.isDown()) {
+                this.p1.dy = paddleSpeed;
             } else {
-                this.p1.dy = 0;        
+                this.p1.dy = 0;
             }
         } else {
             this.ai_update(this.p1, paddleSpeed);
@@ -198,12 +219,12 @@ class Loop {
         }
 
         if (this.p2_playing) {
-            if (this.keyboardHandler.pressedKeys['up']) {
+            if (this.p2.isUp()) {
                 this.p2.dy = -paddleSpeed;
-            } else if (this.keyboardHandler.pressedKeys['down']) {
-                this.p2.dy = paddleSpeed;    
+            } else if(this.p2.isDown()) {
+                this.p2.dy = paddleSpeed;
             } else {
-                this.p2.dy = 0;        
+                this.p2.dy = 0;
             }
         } else {
             this.ai_update(this.p2, paddleSpeed);
@@ -339,9 +360,9 @@ function animator(loop) {
     function animate(timestamp) {
         requestAnimationFrame(animate);
 
-        let dt = _dt();
+        accumulator += _dt();
 
-        accumulator += dt;
+        loop.handleInputs()
 
         while (accumulator > period) {
             loop.update(period);

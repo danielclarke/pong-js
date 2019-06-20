@@ -1,3 +1,9 @@
+var State;
+(function (State) {
+    State["Up"] = "UP";
+    State["Down"] = "DOWN";
+    State["Stopped"] = "STOPPED";
+})(State || (State = {}));
 export default class Player {
     constructor(x, y, colour = "black") {
         this.x = x;
@@ -6,30 +12,35 @@ export default class Player {
         this.dy = 0;
         this.width = 10;
         this.height = 30;
-        this.state = this.states()["stop"];
+        this.state = State.Stopped;
     }
-    /*
-    stop --up key--> up
-    stop --down key--> down
-    up  --down key--> down
-    down --up key--> up
-    up --no key-->stop
-    down --no key--> stop
-    */
-    states() {
-        return {
-            "stop": 0,
-            "up": 1,
-            "down": 2,
-        };
+    isStopped() {
+        return this.state === State.Stopped;
     }
-    is_stopped() {
-        return this.state === this.states()["stop"];
+    isUp() {
+        return this.state === State.Up;
     }
-    is_up() {
-        return this.state === this.states()["up"];
+    isDown() {
+        return this.state === State.Down;
     }
-    is_down() {
-        return this.state === this.states()["down"];
+    handleInput(command) {
+        switch (command) {
+            case "UP": {
+                if (this.state !== State.Up) {
+                    this.state = State.Up;
+                }
+                break;
+            }
+            case "DOWN": {
+                if (this.state !== State.Down) {
+                    this.state = State.Down;
+                }
+                break;
+            }
+            default: {
+                this.state = State.Stopped;
+                break;
+            }
+        }
     }
 }

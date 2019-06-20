@@ -1,3 +1,9 @@
+enum State {
+    Up = "UP",
+    Down = "DOWN",
+    Stopped = "STOPPED",
+} 
+
 export default class Player {
 
     /*
@@ -8,17 +14,9 @@ export default class Player {
     up --no key-->stop
     down --no key--> stop
     */
-    states() {
-        return {
-            "stop": 0,
-            "up": 1,
-            "down": 2,
-        }
-    }
 
     dy: number;
-    state: number;
-
+    state: State;
     width: number;
     height: number;
 
@@ -26,18 +24,39 @@ export default class Player {
         this.dy = 0;
         this.width = 10;
         this.height = 30;
-        this.state = this.states()["stop"];
+        this.state = State.Stopped;
     }
 
-    is_stopped(): boolean {
-        return this.state === this.states()["stop"];
+    isStopped(): boolean {
+        return this.state === State.Stopped;
     }
 
-    is_up(): boolean {
-        return this.state === this.states()["up"];    
+    isUp(): boolean {
+        return this.state === State.Up;    
     }
 
-    is_down(): boolean {
-        return this.state === this.states()["down"];    
+    isDown(): boolean {
+        return this.state === State.Down;    
+    }
+
+    handleInput(command: string): void {
+        switch (command) {
+            case "UP": {
+                if (this.state !== State.Up) {
+                    this.state = State.Up;
+                }
+                break;
+            }
+            case "DOWN": {
+                if (this.state !== State.Down) {
+                    this.state = State.Down;
+                }
+                break;
+            }
+            default: {
+                this.state = State.Stopped;
+                break;
+            }
+        }
     }
 }
