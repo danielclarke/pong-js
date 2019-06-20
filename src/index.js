@@ -99,7 +99,7 @@ class Loop {
                 if (!this.game_started) {
                     this.reset();
                 }
-                this.ball.serve();
+                this.ball.handleInput("SERVE");
             }
         )
     }

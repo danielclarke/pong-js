@@ -1,3 +1,8 @@
+enum State {
+    Set = "SET",
+    Served = "SERVED",
+}
+
 export default class Ball {
 
     /*
@@ -5,20 +10,13 @@ export default class Ball {
         served --score point--> set
     */
 
-    states() {
-        return {
-            "set": 0,
-            "served": 1,
-        }
-    }
-
     start_x: number;
     start_y: number;
     dx: number;
     dy: number;
     width: number;
     height: number;
-    state: number;
+    state: State;
     image: HTMLImageElement;
 
     constructor(public x: number, public y: number, public colour: string) {
@@ -26,19 +24,19 @@ export default class Ball {
         this.start_y = y;
         this.dx = 0;
         this.dy = 0;
-        this.width = 10;
-        this.height = 10;
-        this.state = this.states()["set"];
+        this.width = 16;
+        this.height = 16;
+        this.state = State.Set;
         this.image = new Image();
         this.image.src = 'assets/imgs/ball.png';
     }
 
     is_served(): boolean {
-        return this.state === this.states()["served"];
+        return this.state === State.Served;
     }
 
     is_set(): boolean {
-        return this.state === this.states()["set"];
+        return this.state === State.Set;
     }
 
     update(): void {
@@ -46,9 +44,22 @@ export default class Ball {
         this.y += this.dy;
     }
 
+    handleInput(command: string): void {
+        switch (command) {
+            case "SERVE": {
+                if (this.state !== State.Served) {
+                    this.serve();
+                    this.state = State.Served;
+                }
+            }
+            default: {
+                break;
+            }
+        }
+    }
+
     serve(): void {
         if (!this.is_served()) {
-            this.state = this.states()["served"];
             this.dx = 5;
             this.dy = Math.random() * 5 - 2.5;
         }
@@ -56,7 +67,7 @@ export default class Ball {
 
     reset(): void {
         if (!this.is_set()) {
-            this.state = this.states()["set"];
+            this.state = State.Set;
             this.dx = 0;
             this.dy = 0;
             this.x = this.start_x;
