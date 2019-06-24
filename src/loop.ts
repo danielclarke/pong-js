@@ -1,7 +1,7 @@
 import KeyboardHandler from "./keyboard-handler"
 import AABB, {Point} from "./aabb"
 import Ball from "./ball"
-import Player from "./player"
+import Player, {getPlayerHandler, getAiHandler} from "./player"
 
 
 enum State {
@@ -54,15 +54,14 @@ export default class Loop {
         this.wallHitSound = new Audio("assets/sounds/wall_hit.wav");
         this.gameOverSound = new Audio("assets/sounds/game_over.wav");
 
+        this.ball = new Ball(canvas.width / 2, canvas.height / 2, "#B1F70E");
+
         this.p1 = new Player(10, 0, "#FF1B0F");
         this.p2 = new Player(canvas.width - this.p1.width - 10, canvas.height - this.p1.height, "#E10D92");
-
-        this.p1Handler = this.getAiHandler(this.p1);
-        this.p2Handler = this.getAiHandler(this.p2);
-
         this.p1Score = 0;
         this.p2Score = 0;
-        this.ball = new Ball(canvas.width / 2, canvas.height / 2, "#B1F70E");
+        this.p1Handler = getAiHandler(this.p1, this.ball);
+        this.p2Handler = getAiHandler(this.p2, this.ball);
 
         this.grassImages = [new Image(), new Image(), new Image()];
         this.grassImages[0].src = 'assets/imgs/grass1.png';
@@ -96,17 +95,20 @@ export default class Loop {
 
     initKeyboard() {
         
+        const p1PlayerHandler = getPlayerHandler(this.p1, 'w', 's', this.keyboardHandler);
+        const p2PlayerHandler = getPlayerHandler(this.p2, 'up', 'down', this.keyboardHandler);
+
         this.keyboardHandler.addKeyDownHandler('w', 
             (evt) => {
                 if (this.state === State.PreGame) {
-                    this.p1Handler = this.getPlayerHandler(this.p1, 'w', 's');
+                    this.p1Handler = p1PlayerHandler;
                 }
             }
         )
         this.keyboardHandler.addKeyDownHandler('s', 
             (evt) => {
                 if (this.state === State.PreGame) {
-                    this.p1Handler = this.getPlayerHandler(this.p1, 'w', 's');
+                    this.p1Handler = p1PlayerHandler;
                 }
             }
         )
@@ -114,14 +116,14 @@ export default class Loop {
         this.keyboardHandler.addKeyDownHandler('up', 
             (evt) => {
                 if (this.state === State.PreGame) {
-                    this.p2Handler = this.getPlayerHandler(this.p2, 'up', 'down');
+                    this.p2Handler = p2PlayerHandler;
                 }
             }
         )
         this.keyboardHandler.addKeyDownHandler('down', 
             (evt) => {
                 if (this.state === State.PreGame) {
-                    this.p2Handler = this.getPlayerHandler(this.p2, 'up', 'down');
+                    this.p2Handler = p2PlayerHandler;
                 }
             }
         )
@@ -160,8 +162,8 @@ export default class Loop {
     gameOver() {
         this.gameOverSound.play();
         this.state = State.GameOver;
-        this.p1Handler = this.getAiHandler(this.p1);
-        this.p2Handler = this.getAiHandler(this.p2);
+        this.p1Handler = getAiHandler(this.p1, this.ball);
+        this.p2Handler = getAiHandler(this.p2, this.ball);
     }
 
     isGameOver() {
@@ -170,30 +172,6 @@ export default class Loop {
             return true;
         }
         return false;
-    }
-
-    getPlayerHandler(player: Player, upKey: string, downKey: string) {
-        return () => {
-            if (this.keyboardHandler.pressedKeys[upKey]) {
-                player.handleInput("UP");
-            } else if (this.keyboardHandler.pressedKeys[downKey]) {
-                player.handleInput("DOWN");
-            } else {
-                player.handleInput("NONE");
-            }
-        }
-    }
-
-    getAiHandler(player: Player) {
-        return () => {
-            if (player.y + 2 * player.height / 3 < this.ball.y) {
-                player.handleInput("DOWN");
-            } else if (this.ball.y + this.ball.height < player.y + player.height / 3) {
-                player.handleInput("UP")
-            } else {
-                player.handleInput("NONE");
-            }
-        }
     }
 
     handleInputs() {

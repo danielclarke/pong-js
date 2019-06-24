@@ -1,3 +1,29 @@
+export const getPlayerHandler = (player, upKey, downKey, keyboardHandler) => {
+    return () => {
+        if (keyboardHandler.pressedKeys[upKey]) {
+            player.handleInput("UP");
+        }
+        else if (keyboardHandler.pressedKeys[downKey]) {
+            player.handleInput("DOWN");
+        }
+        else {
+            player.handleInput("NONE");
+        }
+    };
+};
+export const getAiHandler = (player, ball) => {
+    return () => {
+        if (player.y + 2 * player.height / 3 < ball.y) {
+            player.handleInput("DOWN");
+        }
+        else if (ball.y + ball.height < player.y + player.height / 3) {
+            player.handleInput("UP");
+        }
+        else {
+            player.handleInput("NONE");
+        }
+    };
+};
 var State;
 (function (State) {
     State["Up"] = "UP";
