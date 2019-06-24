@@ -1,8 +1,9 @@
+import AABB, {Point} from "./aabb"
 import KeyboardHandler from "./keyboard-handler"
 import Ball from "./ball"
 
 export const getPlayerHandler = (player: Player, upKey: string, downKey: string, keyboardHandler: KeyboardHandler) => {
-    return () => {
+    return (): void => {
         if (keyboardHandler.pressedKeys[upKey]) {
             player.handleInput("UP");
         } else if (keyboardHandler.pressedKeys[downKey]) {
@@ -14,7 +15,7 @@ export const getPlayerHandler = (player: Player, upKey: string, downKey: string,
 }
 
 export const getAiHandler = (player: Player, ball: Ball) => {
-    return () => {
+    return (): void => {
         if (player.y + 2 * player.height / 3 < ball.y) {
             player.handleInput("DOWN");
         } else if (ball.y + ball.height < player.y + player.height / 3) {
@@ -46,12 +47,14 @@ export default class Player {
     state: State;
     width: number;
     height: number;
+    paddleSpeed: number;
 
     constructor(public x: number, public y: number, public colour: string="black") {
         this.dy = 0;
         this.width = 10;
         this.height = 30;
         this.state = State.Stopped;
+        this.paddleSpeed = 0.25;
     }
 
     isStopped(): boolean {
@@ -85,5 +88,22 @@ export default class Player {
                 break;
             }
         }
+    }
+
+    update(dt: number): void {
+        if (this.isUp()) {
+            this.dy = -this.paddleSpeed;
+        } else if(this.isDown()) {
+            this.dy = this.paddleSpeed;
+        } else {
+            this.dy = 0;
+        }
+
+        this.y += this.dy * dt;
+    }
+
+    collidesWith(ball: Ball): boolean {
+        const aabb = new AABB(new Point(this.x, this.y), this.width, this.height);
+        return aabb.intersects(ball.getBoundingBox());
     }
 }

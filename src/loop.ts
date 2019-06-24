@@ -182,18 +182,12 @@ export default class Loop {
     update(dt: number) {
 
         const paddleSpeed = dt / 4;
-        const ballSpeed = paddleSpeed * 1.1;
+        const ballSpeed = paddleSpeed * 1.1 / dt;
         const padding = 10;
 
-        if (this.p1.isUp()) {
-            this.p1.dy = -paddleSpeed;
-        } else if(this.p1.isDown()) {
-            this.p1.dy = paddleSpeed;
-        } else {
-            this.p1.dy = 0;
-        }
+        this.p1.update(dt);
+        this.p2.update(dt);
 
-        this.p1.y += this.p1.dy;
         if (this.canvas.height - this.p1.height - padding < this.p1.y) {
             this.p1.y = this.canvas.height - this.p1.height - padding;
         }
@@ -201,23 +195,20 @@ export default class Loop {
             this.p1.y = 0 + padding;
         }
 
-        if (this.p2.isUp()) {
-            this.p2.dy = -paddleSpeed;
-        } else if(this.p2.isDown()) {
-            this.p2.dy = paddleSpeed;
-        } else {
-            this.p2.dy = 0;
-        }
-
-        this.p2.y += this.p2.dy;
-        if (this.canvas.height - this.p2.height - padding< this.p2.y) {
+        if (this.canvas.height - this.p2.height - padding < this.p2.y) {
             this.p2.y = this.canvas.height - this.p2.height - padding;
         }
         if (this.p2.y < 0 + padding) {
             this.p2.y = 0 + padding;
         }
 
-        this.ball.update();
+        this.ball.update(dt);
+        if (this.ball.dy < -ballSpeed) {
+            this.ball.dy = -ballSpeed;
+        }
+        if (this.ball.dy > ballSpeed) {
+            this.ball.dy = ballSpeed;
+        }
 
         let ballAABB = new AABB(new Point(this.ball.x, this.ball.y), this.ball.width, this.ball.height);
         let p1AABB = new AABB(new Point(this.p1.x, this.p1.y), this.p1.width, this.p1.height);
@@ -269,13 +260,6 @@ export default class Loop {
         if (this.isGameOver() && this.state !== State.GameOver) {
             this.gameOver();
             this.ball.reset();
-        }
-
-        if (this.ball.dy < -ballSpeed) {
-            this.ball.dy = -ballSpeed;
-        }
-        if (this.ball.dy > ballSpeed) {
-            this.ball.dy = ballSpeed;
         }
     }
 

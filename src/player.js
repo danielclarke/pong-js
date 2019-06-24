@@ -1,3 +1,4 @@
+import AABB, { Point } from "./aabb.js";
 export const getPlayerHandler = (player, upKey, downKey, keyboardHandler) => {
     return () => {
         if (keyboardHandler.pressedKeys[upKey]) {
@@ -39,6 +40,7 @@ export default class Player {
         this.width = 10;
         this.height = 30;
         this.state = State.Stopped;
+        this.paddleSpeed = 0.25;
     }
     isStopped() {
         return this.state === State.Stopped;
@@ -68,5 +70,21 @@ export default class Player {
                 break;
             }
         }
+    }
+    update(dt) {
+        if (this.isUp()) {
+            this.dy = -this.paddleSpeed;
+        }
+        else if (this.isDown()) {
+            this.dy = this.paddleSpeed;
+        }
+        else {
+            this.dy = 0;
+        }
+        this.y += this.dy * dt;
+    }
+    collidesWith(ball) {
+        const aabb = new AABB(new Point(this.x, this.y), this.width, this.height);
+        return aabb.intersects(ball.getBoundingBox());
     }
 }

@@ -1,3 +1,5 @@
+import AABB, {Point} from "./aabb"
+
 enum State {
     Set = "SET",
     Served = "SERVED",
@@ -39,9 +41,9 @@ export default class Ball {
         return this.state === State.Set;
     }
 
-    update(): void {
-        this.x += this.dx;
-        this.y += this.dy;
+    update(dt: number): void {
+        this.x += this.dx * dt;
+        this.y += this.dy * dt;
     }
 
     handleInput(command: string): void {
@@ -60,8 +62,8 @@ export default class Ball {
 
     serve(): void {
         if (!this.is_served()) {
-            this.dx = 5;
-            this.dy = Math.random() * 5 - 2.5;
+            this.dx = 0.25;
+            this.dy = Math.random() * 0.25 - 0.125;
         }
     }
 
@@ -73,5 +75,9 @@ export default class Ball {
             this.x = this.start_x;
             this.y = this.start_y;
         }
+    }
+
+    getBoundingBox(): AABB<undefined> {
+        return new AABB(new Point(this.x, this.y), this.width, this.height);
     }
 }

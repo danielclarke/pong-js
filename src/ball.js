@@ -1,3 +1,4 @@
+import AABB, { Point } from "./aabb.js";
 var State;
 (function (State) {
     State["Set"] = "SET";
@@ -24,9 +25,9 @@ export default class Ball {
     is_set() {
         return this.state === State.Set;
     }
-    update() {
-        this.x += this.dx;
-        this.y += this.dy;
+    update(dt) {
+        this.x += this.dx * dt;
+        this.y += this.dy * dt;
     }
     handleInput(command) {
         switch (command) {
@@ -43,8 +44,8 @@ export default class Ball {
     }
     serve() {
         if (!this.is_served()) {
-            this.dx = 5;
-            this.dy = Math.random() * 5 - 2.5;
+            this.dx = 0.25;
+            this.dy = Math.random() * 0.25 - 0.125;
         }
     }
     reset() {
@@ -55,5 +56,8 @@ export default class Ball {
             this.x = this.start_x;
             this.y = this.start_y;
         }
+    }
+    getBoundingBox() {
+        return new AABB(new Point(this.x, this.y), this.width, this.height);
     }
 }
