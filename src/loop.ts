@@ -2,6 +2,7 @@ import KeyboardHandler from "./keyboard-handler"
 import AABB, {Point} from "./aabb"
 import Ball from "./ball"
 import Player, {getPlayerHandler, getAiHandler} from "./player"
+import {restrictPlayerMovement, restrictBallMovement} from "./physics"
 
 
 enum State {
@@ -93,7 +94,7 @@ export default class Loop {
         this.initKeyboard();
     }
 
-    initKeyboard() {
+    initKeyboard(): void {
         
         const p1PlayerHandler = getPlayerHandler(this.p1, 'w', 's', this.keyboardHandler);
         const p2PlayerHandler = getPlayerHandler(this.p2, 'up', 'down', this.keyboardHandler);
@@ -154,19 +155,19 @@ export default class Loop {
         )
     }
 
-    reset() {
+    reset(): void {
         this.p1Score = 0;
         this.p2Score = 0;
     }
 
-    gameOver() {
+    gameOver(): void {
         this.gameOverSound.play();
         this.state = State.GameOver;
         this.p1Handler = getAiHandler(this.p1, this.ball);
         this.p2Handler = getAiHandler(this.p2, this.ball);
     }
 
-    isGameOver() {
+    isGameOver(): boolean {
         const max_score = 11;
         if (this.p1Score === max_score || this.p2Score === max_score) {
             return true;
@@ -174,42 +175,12 @@ export default class Loop {
         return false;
     }
 
-    handleInputs() {
+    handleInputs(): void {
         this.p1Handler();
         this.p2Handler();
     }
 
-    update(dt: number) {
-
-        const paddleSpeed = dt / 4;
-        const ballSpeed = paddleSpeed * 1.1 / dt;
-        const padding = 10;
-
-        this.p1.update(dt);
-        this.p2.update(dt);
-
-        if (this.canvas.height - this.p1.height - padding < this.p1.y) {
-            this.p1.y = this.canvas.height - this.p1.height - padding;
-        }
-        if (this.p1.y < 0 + padding) {
-            this.p1.y = 0 + padding;
-        }
-
-        if (this.canvas.height - this.p2.height - padding < this.p2.y) {
-            this.p2.y = this.canvas.height - this.p2.height - padding;
-        }
-        if (this.p2.y < 0 + padding) {
-            this.p2.y = 0 + padding;
-        }
-
-        this.ball.update(dt);
-        if (this.ball.dy < -ballSpeed) {
-            this.ball.dy = -ballSpeed;
-        }
-        if (this.ball.dy > ballSpeed) {
-            this.ball.dy = ballSpeed;
-        }
-
+    handleCollision(): void {
         let ballAABB = new AABB(new Point(this.ball.x, this.ball.y), this.ball.width, this.ball.height);
         let p1AABB = new AABB(new Point(this.p1.x, this.p1.y), this.p1.width, this.p1.height);
         let p2AABB = new AABB(new Point(this.p2.x, this.p2.y), this.p2.width, this.p2.height);
@@ -230,17 +201,10 @@ export default class Loop {
             }
             this.paddleHitSound.play();
         }
+    }
 
-        if (this.ball.y < 0) {
-            this.ball.y = 0;
-            this.ball.dy = - this.ball.dy * 0.9;
-            this.wallHitSound.play();
-        } else if (this.canvas.height < this.ball.y + this.ball.height) {
-            this.ball.y = this.canvas.height - this.ball.height;
-            this.ball.dy = - this.ball.dy * 0.9;
-            this.wallHitSound.play();
-        } 
-
+    handleScore(): void {
+        // move to scoring handler
         if (this.ball.x + 4 * this.ball.width < 0) {
             this.ball.reset();
             this.scoreSound.play();
@@ -256,6 +220,36 @@ export default class Loop {
             // this.ball.x = canvas.width - this.ball.width;
             // this.ball.dx = - this.ball.dx * 0.9;
         }
+    }
+
+    update(dt: number) {
+
+        const paddleSpeed = dt / 4;
+        const ballSpeed = paddleSpeed * 1.1 / dt;
+        const padding = 10;
+
+        const playerBoundary = new AABB(new Point(padding, padding), this.canvas.width - padding * 2, this.canvas.height - padding * 2);
+        const ballBoundary = new AABB(new Point(0, 0), this.canvas.width, this.canvas.height);
+
+        this.p1.update(dt);
+        restrictPlayerMovement(this.p1, playerBoundary);
+        this.p2.update(dt);
+        restrictPlayerMovement(this.p2, playerBoundary);
+
+        this.ball.update(dt);
+        // replace with sub pub or component
+        if(restrictBallMovement(this.ball, ballBoundary)) {
+            this.wallHitSound.play();
+        }
+        if (this.ball.dy < -ballSpeed) {
+            this.ball.dy = -ballSpeed;
+        }
+        if (this.ball.dy > ballSpeed) {
+            this.ball.dy = ballSpeed;
+        }
+
+        this.handleCollision();
+        this.handleScore();
 
         if (this.isGameOver() && this.state !== State.GameOver) {
             this.gameOver();

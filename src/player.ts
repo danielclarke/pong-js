@@ -106,4 +106,8 @@ export default class Player {
         const aabb = new AABB(new Point(this.x, this.y), this.width, this.height);
         return aabb.intersects(ball.getBoundingBox());
     }
+
+    getBoundingBox(): AABB<undefined> {
+        return new AABB(new Point(this.x, this.y), this.width, this.height);
+    }
 }

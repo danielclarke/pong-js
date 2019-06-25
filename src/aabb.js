@@ -11,12 +11,12 @@ export default class AABB {
         this.width = width;
         this.height = height;
     }
-    contains(point) {
-        return this.point.x <= point.x &&
-            this.point.y <= point.y &&
-            point.x < this.point.x + this.width &&
-            point.y < this.point.y + this.height;
-    }
+    // contains (point: Point<T>): boolean {
+    //     return this.point.x <= point.x &&
+    //     this.point.y <= point.y &&
+    //     point.x < this.point.x + this.width &&
+    //     point.y < this.point.y + this.height;
+    // }
     intersects(aabb) {
         if (!(aabb.point.x + aabb.width < this.point.x ||
             aabb.point.y + aabb.height < this.point.y ||
@@ -25,5 +25,25 @@ export default class AABB {
             return true;
         }
         return false;
+    }
+    containsPoint(point) {
+        return this.point.x <= point.x &&
+            this.point.y <= point.y &&
+            point.x < this.point.x + this.width &&
+            point.y < this.point.y + this.height;
+    }
+    contains(aabb) {
+        const a = [
+            new Point(aabb.point.x, aabb.point.y, aabb.point.data),
+            new Point(aabb.point.x + aabb.width, aabb.point.y, aabb.point.data),
+            new Point(aabb.point.x, aabb.point.y + aabb.height, aabb.point.data),
+            new Point(aabb.point.x + aabb.width, aabb.point.y + aabb.height, aabb.point.data)
+        ];
+        for (let p of a) {
+            if (!this.containsPoint(p)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

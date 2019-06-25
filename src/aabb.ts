@@ -5,12 +5,12 @@ export class Point<T> {
 export default class AABB<T> {
     constructor (public point: Point<T>, public width: number, public height: number) {}
 
-    contains (point: Point<T>): boolean {
-        return this.point.x <= point.x &&
-        this.point.y <= point.y &&
-        point.x < this.point.x + this.width &&
-        point.y < this.point.y + this.height;
-    }
+    // contains (point: Point<T>): boolean {
+    //     return this.point.x <= point.x &&
+    //     this.point.y <= point.y &&
+    //     point.x < this.point.x + this.width &&
+    //     point.y < this.point.y + this.height;
+    // }
 
     intersects (aabb: AABB<T>): boolean {
         if (!(
@@ -22,5 +22,27 @@ export default class AABB<T> {
             return true;
         }
         return false;
+    }
+
+    containsPoint (point: Point<T>): boolean {
+        return this.point.x <= point.x &&
+        this.point.y <= point.y &&
+        point.x < this.point.x + this.width &&
+        point.y < this.point.y + this.height;
+    }
+
+    contains (aabb: AABB<T>): boolean {
+        const a = [
+            new Point(aabb.point.x, aabb.point.y, aabb.point.data), 
+            new Point(aabb.point.x + aabb.width, aabb.point.y, aabb.point.data),
+            new Point(aabb.point.x, aabb.point.y + aabb.height, aabb.point.data),
+            new Point(aabb.point.x + aabb.width, aabb.point.y + aabb.height, aabb.point.data)
+        ]
+        for (let p of a) {
+            if (!this.containsPoint(p)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
