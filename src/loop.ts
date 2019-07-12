@@ -12,7 +12,6 @@ enum LoopState {
     PreGame = "PRE_GAME",
     Serve = "SERVE",
     Active = "ACTIVE",
-    GameOver = "GAME_OVER",
     Paused = "PAUSED",
 }
 /*
@@ -93,14 +92,7 @@ export default class Loop implements State {
         }
     }
 
-    reset(): void {
-        this.p1Score = 0;
-        this.p2Score = 0;
-    }
-
     gameOver(stateStack: StateStack): void {
-        this.p1Handler = getAiHandler(this.p1, this.ball);
-        this.p2Handler = getAiHandler(this.p2, this.ball);
         this.render();
         stateStack.push(new GameOverState(this.canvas));
     }
@@ -136,7 +128,6 @@ export default class Loop implements State {
                     this.p2Handler = p2PlayerHandler;
                 }
                 if (this.keyboardHandler.pressedKeys['space']) {
-                    this.reset();
                     this.ball.handleInput("SERVE");
                     this.state = LoopState.Active;
                 }
@@ -156,9 +147,12 @@ export default class Loop implements State {
     }
 
     enter(): void {
-        this.reset();
         this.state = LoopState.PreGame;
         this.keyboardHandler = new KeyboardHandler();
+        this.p1Score = 0;
+        this.p2Score = 0;
+        this.p1Handler = getAiHandler(this.p1, this.ball);
+        this.p2Handler = getAiHandler(this.p2, this.ball);
     }
 
     exit(): void {}

@@ -10,7 +10,6 @@ var LoopState;
     LoopState["PreGame"] = "PRE_GAME";
     LoopState["Serve"] = "SERVE";
     LoopState["Active"] = "ACTIVE";
-    LoopState["GameOver"] = "GAME_OVER";
     LoopState["Paused"] = "PAUSED";
 })(LoopState || (LoopState = {}));
 /*
@@ -61,13 +60,7 @@ export default class Loop {
             img.onload = f;
         }
     }
-    reset() {
-        this.p1Score = 0;
-        this.p2Score = 0;
-    }
     gameOver(stateStack) {
-        this.p1Handler = getAiHandler(this.p1, this.ball);
-        this.p2Handler = getAiHandler(this.p2, this.ball);
         this.render();
         stateStack.push(new GameOverState(this.canvas));
     }
@@ -98,7 +91,6 @@ export default class Loop {
                     this.p2Handler = p2PlayerHandler;
                 }
                 if (this.keyboardHandler.pressedKeys['space']) {
-                    this.reset();
                     this.ball.handleInput("SERVE");
                     this.state = LoopState.Active;
                 }
@@ -117,9 +109,12 @@ export default class Loop {
         }
     }
     enter() {
-        this.reset();
         this.state = LoopState.PreGame;
         this.keyboardHandler = new KeyboardHandler();
+        this.p1Score = 0;
+        this.p2Score = 0;
+        this.p1Handler = getAiHandler(this.p1, this.ball);
+        this.p2Handler = getAiHandler(this.p2, this.ball);
     }
     exit() { }
     handleCollision() {
