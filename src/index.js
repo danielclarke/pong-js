@@ -1,25 +1,24 @@
 import Loop from "./loop.js"
+import StateStack from "./state-stack.js"
 
 let canvas = document.getElementById('main-layer');
-let context = canvas.getContext('2d');
 // canvas.width = window.innerWidth;
 // canvas.height = window.innerHeight;
 
 let bgCanvas = document.createElement('canvas');
-let bgContext = bgCanvas.getContext('2d');
 bgCanvas.width = canvas.width;
 bgCanvas.height = canvas.height;
 
 const FPS = 60;
-const paddleWidth = 10;
-const paddleHeight = 30;
-let loop;
+let stateStack;
 
 function init() {
-    loop = new Loop(canvas, bgCanvas);
+    let loop = new Loop(canvas, bgCanvas);
+    stateStack = new StateStack();
+    stateStack.push(loop);
 }
 
-function animator(loop) {
+function animator(stateStack) {
     const period = 1000.0 / FPS;
     let accumulator = 0;
     let last = 0;
@@ -36,18 +35,18 @@ function animator(loop) {
 
         accumulator += _dt();
 
-        loop.handleInputs()
+        stateStack.handleInputs()
 
         while (accumulator > period) {
-            loop.update(period);
+            stateStack.update(period);
             accumulator -= period;
         }
 
-        loop.render();
+        stateStack.render();
     }
 
     return animate;
 }
 
 init();
-animator(loop)();
+animator(stateStack)();

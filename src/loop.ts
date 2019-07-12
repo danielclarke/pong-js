@@ -3,9 +3,11 @@ import AABB, {Point} from "./aabb"
 import Ball from "./ball"
 import Player, {getPlayerHandler, getAiHandler} from "./player"
 import {restrictPlayerMovement, restrictBallMovement} from "./physics"
+import StateStack, {State} from "./state-stack"
+import GameOverState from "./game-over-state"
 
 
-enum State {
+enum LoopState {
     Title = "TITLE",
     PreGame = "PRE_GAME",
     Serve = "SERVE",
@@ -23,9 +25,9 @@ enum State {
     game over --enter--> pre game
 */
 
-export default class Loop {
+export default class Loop implements State {
 
-    state: State;
+    state: LoopState;
     context: CanvasRenderingContext2D;
     bgContext: CanvasRenderingContext2D;
 
@@ -41,19 +43,18 @@ export default class Loop {
     scoreSound: HTMLAudioElement;
     paddleHitSound: HTMLAudioElement;
     wallHitSound: HTMLAudioElement;
-    gameOverSound: HTMLAudioElement;
 
     constructor(public canvas: HTMLCanvasElement, public bgCanvas: HTMLCanvasElement) {
+
         this.context = canvas.getContext('2d') || new CanvasRenderingContext2D();
         this.bgContext = bgCanvas.getContext('2d') || new CanvasRenderingContext2D();
 
-        this.state = State.PreGame;
+        this.state = LoopState.PreGame;
         this.keyboardHandler = new KeyboardHandler();
 
         this.scoreSound = new Audio("assets/sounds/score.wav");
         this.paddleHitSound = new Audio("assets/sounds/paddle_hit.wav");
         this.wallHitSound = new Audio("assets/sounds/wall_hit.wav");
-        this.gameOverSound = new Audio("assets/sounds/game_over.wav");
 
         this.ball = new Ball(canvas.width / 2, canvas.height / 2, "#B1F70E");
 
@@ -90,69 +91,6 @@ export default class Loop {
         for (let img of this.grassImages) {
             img.onload = f;
         }
-
-        this.initKeyboard();
-    }
-
-    initKeyboard(): void {
-        
-        const p1PlayerHandler = getPlayerHandler(this.p1, 'w', 's', this.keyboardHandler);
-        const p2PlayerHandler = getPlayerHandler(this.p2, 'up', 'down', this.keyboardHandler);
-
-        this.keyboardHandler.addKeyDownHandler('w', 
-            (evt) => {
-                if (this.state === State.PreGame) {
-                    this.p1Handler = p1PlayerHandler;
-                }
-            }
-        )
-        this.keyboardHandler.addKeyDownHandler('s', 
-            (evt) => {
-                if (this.state === State.PreGame) {
-                    this.p1Handler = p1PlayerHandler;
-                }
-            }
-        )
-
-        this.keyboardHandler.addKeyDownHandler('up', 
-            (evt) => {
-                if (this.state === State.PreGame) {
-                    this.p2Handler = p2PlayerHandler;
-                }
-            }
-        )
-        this.keyboardHandler.addKeyDownHandler('down', 
-            (evt) => {
-                if (this.state === State.PreGame) {
-                    this.p2Handler = p2PlayerHandler;
-                }
-            }
-        )
-
-        this.keyboardHandler.addKeyDownHandler('space',
-            (evt) => {
-                switch (this.state) {
-                    case State.PreGame: {
-                        this.reset();
-                        this.ball.handleInput("SERVE");
-                        this.state = State.Active;
-                        break;
-                    }
-                    case State.Serve: {
-                        this.ball.handleInput("SERVE");
-                        this.state = State.Active;
-                        break;
-                    }
-                    case State.GameOver: {
-                        this.reset();
-                        this.state = State.PreGame;
-                    }
-                    default: {
-                        break;
-                    }
-                }
-            }
-        )
     }
 
     reset(): void {
@@ -160,15 +98,15 @@ export default class Loop {
         this.p2Score = 0;
     }
 
-    gameOver(): void {
-        this.gameOverSound.play();
-        this.state = State.GameOver;
+    gameOver(stateStack: StateStack): void {
         this.p1Handler = getAiHandler(this.p1, this.ball);
         this.p2Handler = getAiHandler(this.p2, this.ball);
+        this.render();
+        stateStack.push(new GameOverState(this.canvas));
     }
 
     isGameOver(): boolean {
-        const max_score = 11;
+        const max_score = 1;
         if (this.p1Score === max_score || this.p2Score === max_score) {
             return true;
         }
@@ -176,9 +114,56 @@ export default class Loop {
     }
 
     handleInputs(): void {
-        this.p1Handler();
-        this.p2Handler();
+
+        switch (this.state) {
+            case LoopState.PreGame: {
+                const p1PlayerHandler = getPlayerHandler(this.p1, 'w', 's', this.keyboardHandler);
+                const p2PlayerHandler = getPlayerHandler(this.p2, 'up', 'down', this.keyboardHandler);
+        
+                if (this.keyboardHandler.pressedKeys['w']) {
+                    this.p1Handler = p1PlayerHandler;
+                }
+                if (this.keyboardHandler.pressedKeys['s']) {
+                    this.p1Handler = p1PlayerHandler;
+                }
+                if (this.keyboardHandler.pressedKeys['up']) {
+                    this.p2Handler = p2PlayerHandler;
+                }
+                if (this.keyboardHandler.pressedKeys['down']) {
+                    this.p2Handler = p2PlayerHandler;
+                }
+                if (this.keyboardHandler.pressedKeys['space']) {
+                    this.reset();
+                    this.ball.handleInput("SERVE");
+                    this.state = LoopState.Active;
+                    break;
+                }
+            }
+            case LoopState.Serve: {
+                if (this.keyboardHandler.pressedKeys['space']) {
+                    this.ball.handleInput("SERVE");
+                    this.state = LoopState.Active;
+                    break;
+                }
+            }
+            case LoopState.Active: {
+                this.p1Handler();
+                this.p2Handler();
+                break;
+            }
+            default: {
+                break;
+            }
+        }
     }
+
+    enter(): void {
+        this.reset();
+        this.state = LoopState.PreGame;
+        this.keyboardHandler = new KeyboardHandler();
+    }
+
+    exit(): void {}
 
     handleCollision(): void {
         let ballAABB = new AABB(new Point(this.ball.x, this.ball.y), this.ball.width, this.ball.height);
@@ -209,20 +194,20 @@ export default class Loop {
             this.ball.reset();
             this.scoreSound.play();
             this.p2Score += 1;
-            this.state = State.Serve;
+            this.state = LoopState.Serve;
             // this.ball.x = 0;
             // this.ball.dx = - this.ball.dx * 0.9;
         } else if (this.canvas.width < this.ball.x - 4 * this.ball.width) {
             this.ball.reset();
             this.scoreSound.play();
             this.p1Score += 1;
-            this.state = State.Serve;
+            this.state = LoopState.Serve;
             // this.ball.x = canvas.width - this.ball.width;
             // this.ball.dx = - this.ball.dx * 0.9;
         }
     }
 
-    update(dt: number) {
+    update(stateStack: StateStack, dt: number) {
 
         const paddleSpeed = dt / 4;
         const ballSpeed = paddleSpeed * 1.1 / dt;
@@ -251,8 +236,8 @@ export default class Loop {
         this.handleCollision();
         this.handleScore();
 
-        if (this.isGameOver() && this.state !== State.GameOver) {
-            this.gameOver();
+        if (this.isGameOver()) {
+            this.gameOver(stateStack);
             this.ball.reset();
         }
     }
@@ -293,9 +278,5 @@ export default class Loop {
         this.context.fillStyle = "White"
         this.context.font = "bold 25px Courier New";
         this.context.fillText(`${this.p1Score} - ${this.p2Score}`, this.canvas.width / 2 - 33, 30);
-        if (this.state === State.GameOver) {
-            this.context.font = "bold 48px Courier New";
-            this.context.fillText(`GAME OVER`, this.canvas.width / 2 - 125, this.canvas.height / 2 - 60);        
-        }
     }
 }
