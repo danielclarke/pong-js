@@ -79,6 +79,8 @@ export default class Loop {
         return false;
     }
     handleInputs() {
+        this.p1Handler();
+        this.p2Handler();
         switch (this.state) {
             case LoopState.PreGame: {
                 const p1PlayerHandler = getPlayerHandler(this.p1, 'w', 's', this.keyboardHandler);
@@ -99,19 +101,14 @@ export default class Loop {
                     this.reset();
                     this.ball.handleInput("SERVE");
                     this.state = LoopState.Active;
-                    break;
                 }
+                break;
             }
             case LoopState.Serve: {
                 if (this.keyboardHandler.pressedKeys['space']) {
                     this.ball.handleInput("SERVE");
                     this.state = LoopState.Active;
-                    break;
                 }
-            }
-            case LoopState.Active: {
-                this.p1Handler();
-                this.p2Handler();
                 break;
             }
             default: {
