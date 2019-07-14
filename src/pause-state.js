@@ -1,27 +1,25 @@
 import KeyboardHandler from "./keyboard-handler.js";
-import TitleState from "./title-state.js";
-export default class GameOverState {
+export default class PauseState {
     constructor(canvas) {
         this.canvas = canvas;
         this.keyboardHandler = new KeyboardHandler();
         this.context = canvas.getContext('2d') || new CanvasRenderingContext2D();
-        this.gameOverSound = new Audio("assets/sounds/game_over.wav");
+        this.PauseSound = new Audio("assets/sounds/pause_sound.wav");
     }
     enter() {
-        this.gameOverSound.play();
+        this.PauseSound.play();
         this.keyboardHandler = new KeyboardHandler();
     }
-    exit(stateStack) {
-        stateStack.push(new TitleState(this.canvas));
-    }
+    exit() { }
     update(stateStack, dt) {
     }
     render() {
+        this.context.fillStyle = "White";
         this.context.font = "bold 48px Courier New";
-        this.context.fillText(`GAME OVER`, this.canvas.width / 2 - 125, this.canvas.height / 2 - 60);
+        this.context.fillText(`PAUSE`, this.canvas.width / 2 - 68, this.canvas.height / 2 - 60);
     }
     handleInputs(stateStack) {
-        if (this.keyboardHandler.pressedKeys['space']) {
+        if (this.keyboardHandler.pressedKeys['p']) {
             stateStack.pop();
         }
     }

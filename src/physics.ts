@@ -1,6 +1,6 @@
-import Player from "./player"
-import AABB from "./aabb"
-import Ball from "./ball";
+import Player from "./player.js"
+import AABB from "./aabb.js"
+import Ball from "./ball.js"
 
 export const restrictPlayerMovement = <T>(player: Player, boundary: AABB<T>): void => {
     player.y = Math.max(player.y, boundary.point.y);

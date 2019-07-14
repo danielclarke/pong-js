@@ -4,13 +4,13 @@ import Ball from "./ball.js";
 import Player, { getPlayerHandler, getAiHandler } from "./player.js";
 import { restrictPlayerMovement, restrictBallMovement } from "./physics.js";
 import GameOverState from "./game-over-state.js";
+import PauseState from "./pause-state.js";
 var LoopState;
 (function (LoopState) {
     LoopState["Title"] = "TITLE";
     LoopState["PreGame"] = "PRE_GAME";
     LoopState["Serve"] = "SERVE";
     LoopState["Active"] = "ACTIVE";
-    LoopState["Paused"] = "PAUSED";
 })(LoopState || (LoopState = {}));
 /*
     title --enter--> pre game
@@ -33,8 +33,8 @@ export default class Loop {
         this.paddleHitSound = new Audio("assets/sounds/paddle_hit.wav");
         this.wallHitSound = new Audio("assets/sounds/wall_hit.wav");
         this.ball = new Ball(canvas.width / 2, canvas.height / 2, "#B1F70E");
-        this.p1 = new Player(10, 0, "#FF1B0F");
-        this.p2 = new Player(canvas.width - this.p1.width - 10, canvas.height - this.p1.height, "#E10D92");
+        this.p1 = new Player(10, 10, "#FF1B0F");
+        this.p2 = new Player(canvas.width - this.p1.width - 10, canvas.height - this.p1.height - 10, "#E10D92");
         this.p1Score = 0;
         this.p2Score = 0;
         this.p1Handler = getAiHandler(this.p1, this.ball);
@@ -49,29 +49,41 @@ export default class Loop {
             if (numLoaded < this.grassImages.length) {
                 return;
             }
-            for (let i = 0; i < canvas.width; i += 7) {
-                for (let j = 0; j < canvas.height; j += 7) {
-                    this.bgContext.drawImage(this.grassImages[Math.floor(Math.random() * 3)], i, j);
-                }
-            }
-            this.context.drawImage(bgCanvas, 0, 0);
+            this.initBackground();
+            this.renderBackground();
+            this.renderEntities();
         };
         for (let img of this.grassImages) {
             img.onload = f;
         }
     }
+    initBackground() {
+        for (let i = 0; i < this.canvas.width; i += 7) {
+            for (let j = 0; j < this.canvas.height; j += 7) {
+                this.bgContext.drawImage(this.grassImages[Math.floor(Math.random() * 3)], i, j);
+            }
+        }
+    }
+    pause(stateStack) {
+        stateStack.push(new PauseState(this.canvas));
+    }
     gameOver(stateStack) {
         this.render();
+        this.state = LoopState.PreGame;
+        this.p1Score = 0;
+        this.p2Score = 0;
+        this.p1Handler = getAiHandler(this.p1, this.ball);
+        this.p2Handler = getAiHandler(this.p2, this.ball);
         stateStack.push(new GameOverState(this.canvas));
     }
     isGameOver() {
-        const max_score = 1;
+        const max_score = 11;
         if (this.p1Score === max_score || this.p2Score === max_score) {
             return true;
         }
         return false;
     }
-    handleInputs() {
+    handleInputs(stateStack) {
         this.p1Handler();
         this.p2Handler();
         switch (this.state) {
@@ -103,20 +115,20 @@ export default class Loop {
                 }
                 break;
             }
+            case LoopState.Active: {
+                if (this.keyboardHandler.pressedKeys['p']) {
+                    this.pause(stateStack);
+                }
+            }
             default: {
                 break;
             }
         }
     }
     enter() {
-        this.state = LoopState.PreGame;
         this.keyboardHandler = new KeyboardHandler();
-        this.p1Score = 0;
-        this.p2Score = 0;
-        this.p1Handler = getAiHandler(this.p1, this.ball);
-        this.p2Handler = getAiHandler(this.p2, this.ball);
     }
-    exit() { }
+    exit(stateStack) { }
     handleCollision() {
         let ballAABB = new AABB(new Point(this.ball.x, this.ball.y), this.ball.width, this.ball.height);
         let p1AABB = new AABB(new Point(this.p1.x, this.p1.y), this.p1.width, this.p1.height);
@@ -185,31 +197,27 @@ export default class Loop {
             this.ball.reset();
         }
     }
-    render() {
-        // make sure objects are rendered at integer coordinates to help stop tearing
-        // https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas#Avoid_floating-point_coordinates_and_use_integers_instead
-        // context.fillStyle = "#2B294B";
-        // context.fillRect(0, 0, canvas.width, canvas.height);
-        // for (let i = 0; i < canvas.width; i+=7) {
-        //     for (let j = 0; j < canvas.height; j+=7) {
-        //         this.bgContext.drawImage(
-        //             this.grassImage,
-        //             i,
-        //             j
-        //         );
-        //     }
-        // }
+    renderBackground() {
         // move to BG Layer
         this.context.drawImage(this.bgCanvas, 0, 0);
+    }
+    renderEntities() {
         // move to player layer
         this.context.fillStyle = this.p1.colour;
         this.context.fillRect(Math.floor(this.p1.x), Math.floor(this.p1.y), this.p1.width, this.p1.height);
         this.context.fillStyle = this.p2.colour;
         this.context.fillRect(Math.floor(this.p2.x), Math.floor(this.p2.y), this.p2.width, this.p2.height);
         this.context.drawImage(this.ball.image, Math.floor(this.ball.x), Math.floor(this.ball.y));
+    }
+    renderScore() {
         // move to UI layer
         this.context.fillStyle = "White";
         this.context.font = "bold 25px Courier New";
         this.context.fillText(`${this.p1Score} - ${this.p2Score}`, this.canvas.width / 2 - 33, 30);
+    }
+    render() {
+        this.renderBackground();
+        this.renderEntities();
+        this.renderScore();
     }
 }

@@ -1,4 +1,5 @@
 import Loop from "./loop.js"
+import TitleState from "./title-state.js"
 import StateStack from "./state-stack.js"
 
 let canvas = document.getElementById('main-layer');
@@ -13,9 +14,9 @@ const FPS = 60;
 let stateStack;
 
 function init() {
-    let loop = new Loop(canvas, bgCanvas);
     stateStack = new StateStack();
-    stateStack.push(loop);
+    stateStack.push(new Loop(canvas, bgCanvas));
+    stateStack.push(new TitleState(canvas));
 }
 
 function animator(stateStack) {

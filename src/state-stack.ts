@@ -1,6 +1,6 @@
 export interface State {
     enter(): void;
-    exit(): void;
+    exit(stateStack: StateStack): void;
     update(stateStack: StateStack, dt: number): void;
     render(): void;
     handleInputs(stateStack: StateStack): void;
@@ -19,7 +19,7 @@ export default class StateStack {
     }
 
     render(): void {
-        this.states[this.states.length - 1].render();
+        this.states.forEach((state: State) => {state.render()});
     }
 
     handleInputs(): void {
@@ -34,7 +34,7 @@ export default class StateStack {
     pop(): State | undefined {
         let state = this.states.pop();
         if (state) {
-            state.exit();
+            state.exit(this);
         }
         if (this.states.length > 0) {
             this.states[this.states.length - 1].enter();

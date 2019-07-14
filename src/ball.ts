@@ -1,4 +1,4 @@
-import AABB, {Point} from "./aabb"
+import AABB, {Point} from "./aabb.js"
 
 enum State {
     Set = "SET",

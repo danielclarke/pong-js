@@ -1,6 +1,6 @@
-import AABB, {Point} from "./aabb"
-import KeyboardHandler from "./keyboard-handler"
-import Ball from "./ball"
+import AABB, {Point} from "./aabb.js"
+import KeyboardHandler from "./keyboard-handler.js"
+import Ball from "./ball.js"
 
 export const getPlayerHandler = (player: Player, upKey: string, downKey: string, keyboardHandler: KeyboardHandler) => {
     return (): void => {
