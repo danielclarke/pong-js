@@ -9,7 +9,6 @@ import PauseState from "./pause-state.js"
 
 
 enum LoopState {
-    Title = "TITLE",
     PreGame = "PRE_GAME",
     Serve = "SERVE",
     Active = "ACTIVE",

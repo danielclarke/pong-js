@@ -7,7 +7,6 @@ import GameOverState from "./game-over-state.js";
 import PauseState from "./pause-state.js";
 var LoopState;
 (function (LoopState) {
-    LoopState["Title"] = "TITLE";
     LoopState["PreGame"] = "PRE_GAME";
     LoopState["Serve"] = "SERVE";
     LoopState["Active"] = "ACTIVE";
