@@ -77,7 +77,7 @@ export default class Loop implements State {
             if (numLoaded < this.grassImages.length) {
                 return;
             }
-            this.initBackground();
+            this.renderBackground();
             this.renderEntities();
             this.renderScore();
             this.gameRenderer.render();
@@ -85,21 +85,6 @@ export default class Loop implements State {
 
         for (let img of this.grassImages) {
             img.onload = f;
-        }
-    }
-
-    initBackground() {
-        let bgContext = this.gameRenderer.layerMap["background"].getContext("2d");
-        if (bgContext) {
-            for (let i = 0; i < this.canvas.width; i+=7) {
-                for (let j = 0; j < this.canvas.height; j+=7) {
-                    bgContext.drawImage(
-                        this.grassImages[Math.floor(Math.random() * 3)],
-                        i,
-                        j
-                    );
-                }
-            }
         }
     }
 
@@ -260,10 +245,20 @@ export default class Loop implements State {
 
         this.renderEntities();
     }
-
+    
     renderBackground() {
-        // move to BG Layer
-        this.context.drawImage(this.bgCanvas, 0, 0);
+        let bgContext = this.gameRenderer.layerMap["background"].getContext("2d");
+        if (bgContext) {
+            for (let i = 0; i < this.canvas.width; i+=7) {
+                for (let j = 0; j < this.canvas.height; j+=7) {
+                    bgContext.drawImage(
+                        this.grassImages[Math.floor(Math.random() * 3)],
+                        i,
+                        j
+                    );
+                }
+            }
+        }
     }
 
     renderEntities() {
