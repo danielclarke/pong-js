@@ -6,16 +6,12 @@ let canvas = document.getElementById('main-layer');
 // canvas.width = window.innerWidth;
 // canvas.height = window.innerHeight;
 
-let bgCanvas = document.createElement('canvas');
-bgCanvas.width = canvas.width;
-bgCanvas.height = canvas.height;
-
 const FPS = 60;
 let stateStack;
 
 function init() {
     stateStack = new StateStack();
-    stateStack.push(new Loop(canvas, bgCanvas));
+    stateStack.push(new Loop(canvas));
     stateStack.push(new TitleState(canvas));
 }
 

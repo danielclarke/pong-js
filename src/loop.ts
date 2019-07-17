@@ -27,8 +27,8 @@ enum LoopState {
 export default class Loop implements State {
 
     state: LoopState;
+    canvas: HTMLCanvasElement;
     context: CanvasRenderingContext2D;
-    bgContext: CanvasRenderingContext2D;
 
     p1: Player;
     p2: Player;
@@ -44,12 +44,16 @@ export default class Loop implements State {
     wallHitSound: HTMLAudioElement;
     gameRenderer: RenderHandler;
 
-    constructor(public canvas: HTMLCanvasElement, public bgCanvas: HTMLCanvasElement) {
-        this.gameRenderer = new RenderHandler(canvas, ["background", "game", "ui"]);
+    constructor(public realCanvas: HTMLCanvasElement) {
 
-        this.context = canvas.getContext('2d') || new CanvasRenderingContext2D();
-        this.bgContext = bgCanvas.getContext('2d') || new CanvasRenderingContext2D();
+        this.canvas = document.createElement("canvas");
+        this.canvas.width = 480;
+        this.canvas.height = 360;
 
+        this.gameRenderer = new RenderHandler(this.canvas, ["background", "game", "ui"]);
+
+        this.context = this.canvas.getContext('2d') || new CanvasRenderingContext2D();
+        
         this.state = LoopState.PreGame;
         this.keyboardHandler = new KeyboardHandler();
 
@@ -57,10 +61,10 @@ export default class Loop implements State {
         this.paddleHitSound = new Audio("assets/sounds/paddle_hit.wav");
         this.wallHitSound = new Audio("assets/sounds/wall_hit.wav");
 
-        this.ball = new Ball(canvas.width / 2, canvas.height / 2, "#B1F70E");
+        this.ball = new Ball(this.canvas.width / 2, this.canvas.height / 2, "#B1F70E");
 
         this.p1 = new Player(10, 10, "#FF1B0F");
-        this.p2 = new Player(canvas.width - this.p1.width - 10, canvas.height - this.p1.height - 10, "#E10D92");
+        this.p2 = new Player(this.canvas.width - this.p1.width - 10, this.canvas.height - this.p1.height - 10, "#E10D92");
         this.p1Score = 0;
         this.p2Score = 0;
         this.p1Handler = getAiHandler(this.p1, this.ball);
@@ -289,6 +293,9 @@ export default class Loop implements State {
     }
 
     render() {
-        this.gameRenderer.render();
+        let context = this.realCanvas.getContext("2d");
+        if (context) {
+            context.drawImage(this.gameRenderer.render(), 0, 0, this.realCanvas.width, this.realCanvas.height);
+        }
     }
 }
