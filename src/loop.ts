@@ -6,6 +6,7 @@ import {restrictPlayerMovement, restrictBallMovement} from "./physics.js"
 import StateStack, {State} from "./state-stack.js"
 import GameOverState from "./game-over-state.js"
 import PauseState from "./pause-state.js"
+import RenderHandler from "./render-handler.js"
 
 
 enum LoopState {
@@ -41,8 +42,10 @@ export default class Loop implements State {
     scoreSound: HTMLAudioElement;
     paddleHitSound: HTMLAudioElement;
     wallHitSound: HTMLAudioElement;
+    gameRenderer: RenderHandler;
 
     constructor(public canvas: HTMLCanvasElement, public bgCanvas: HTMLCanvasElement) {
+        this.gameRenderer = new RenderHandler(canvas, ["background", "game", "ui"]);
 
         this.context = canvas.getContext('2d') || new CanvasRenderingContext2D();
         this.bgContext = bgCanvas.getContext('2d') || new CanvasRenderingContext2D();
@@ -75,8 +78,9 @@ export default class Loop implements State {
                 return;
             }
             this.initBackground();
-            this.renderBackground();
             this.renderEntities();
+            this.renderScore();
+            this.gameRenderer.render();
         }
 
         for (let img of this.grassImages) {
@@ -85,13 +89,16 @@ export default class Loop implements State {
     }
 
     initBackground() {
-        for (let i = 0; i < this.canvas.width; i+=7) {
-            for (let j = 0; j < this.canvas.height; j+=7) {
-                this.bgContext.drawImage(
-                    this.grassImages[Math.floor(Math.random() * 3)],
-                    i,
-                    j
-                );
+        let bgContext = this.gameRenderer.layerMap["background"].getContext("2d");
+        if (bgContext) {
+            for (let i = 0; i < this.canvas.width; i+=7) {
+                for (let j = 0; j < this.canvas.height; j+=7) {
+                    bgContext.drawImage(
+                        this.grassImages[Math.floor(Math.random() * 3)],
+                        i,
+                        j
+                    );
+                }
             }
         }
     }
@@ -166,6 +173,9 @@ export default class Loop implements State {
 
     enter(): void {
         this.keyboardHandler = new KeyboardHandler();
+        this.renderEntities();
+        this.renderScore();
+        this.gameRenderer.render();
     }
 
     exit(stateStack: StateStack): void {}
@@ -202,6 +212,7 @@ export default class Loop implements State {
             this.state = LoopState.Serve;
             // this.ball.x = 0;
             // this.ball.dx = - this.ball.dx * 0.9;
+            this.renderScore();
         } else if (this.canvas.width < this.ball.x - 4 * this.ball.width) {
             this.ball.reset();
             this.scoreSound.play();
@@ -209,6 +220,7 @@ export default class Loop implements State {
             this.state = LoopState.Serve;
             // this.ball.x = canvas.width - this.ball.width;
             // this.ball.dx = - this.ball.dx * 0.9;
+            this.renderScore();
         }
     }
 
@@ -245,6 +257,8 @@ export default class Loop implements State {
             this.gameOver(stateStack);
             this.ball.reset();
         }
+
+        this.renderEntities();
     }
 
     renderBackground() {
@@ -253,28 +267,33 @@ export default class Loop implements State {
     }
 
     renderEntities() {
-        // move to player layer
-        this.context.fillStyle = this.p1.colour;
-        this.context.fillRect(Math.floor(this.p1.x), Math.floor(this.p1.y), this.p1.width, this.p1.height);
-        this.context.fillStyle = this.p2.colour;
-        this.context.fillRect(Math.floor(this.p2.x), Math.floor(this.p2.y), this.p2.width, this.p2.height);
-        this.context.drawImage(
-            this.ball.image,
-            Math.floor(this.ball.x), 
-            Math.floor(this.ball.y),
-        );
+        let gameContext = this.gameRenderer.layerMap["game"].getContext("2d");
+        if (gameContext) {
+            gameContext.clearRect(0, 0, this.gameRenderer.layerMap["game"].width, this.gameRenderer.layerMap["game"].height);
+            gameContext.fillStyle = this.p1.colour;
+            gameContext.fillRect(Math.floor(this.p1.x), Math.floor(this.p1.y), this.p1.width, this.p1.height);
+            gameContext.fillStyle = this.p2.colour;
+            gameContext.fillRect(Math.floor(this.p2.x), Math.floor(this.p2.y), this.p2.width, this.p2.height);
+            gameContext.drawImage(
+                this.ball.image,
+                Math.floor(this.ball.x), 
+                Math.floor(this.ball.y),
+            );
+        }
     }
 
     renderScore() {
         // move to UI layer
-        this.context.fillStyle = "White"
-        this.context.font = "bold 25px Courier New";
-        this.context.fillText(`${this.p1Score} - ${this.p2Score}`, this.canvas.width / 2 - 33, 30);
+        let uiContext = this.gameRenderer.layerMap["ui"].getContext("2d");
+        if (uiContext) {
+            uiContext.clearRect(0, 0, this.gameRenderer.layerMap["game"].width, this.gameRenderer.layerMap["game"].height);
+            uiContext.fillStyle = "White"
+            uiContext.font = "bold 25px Courier New";
+            uiContext.fillText(`${this.p1Score} - ${this.p2Score}`, this.canvas.width / 2 - 33, 30);
+        }
     }
 
     render() {
-        this.renderBackground();
-        this.renderEntities();
-        this.renderScore();
+        this.gameRenderer.render();
     }
 }

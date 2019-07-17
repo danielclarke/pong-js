@@ -11,8 +11,7 @@ export default class PauseState {
         this.keyboardHandler = new KeyboardHandler();
     }
     exit() { }
-    update(stateStack, dt) {
-    }
+    update(stateStack, dt) { }
     render() {
         this.context.fillStyle = "White";
         this.context.font = "bold 48px Courier New";
