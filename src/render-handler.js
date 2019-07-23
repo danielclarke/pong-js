@@ -1,6 +1,8 @@
 export default class RenderHandler {
-    constructor(canvas, layerNames) {
+    constructor(canvas, width, height, layerNames) {
         this.canvas = canvas;
+        this.width = width;
+        this.height = height;
         this.layerNames = layerNames;
         this.layerMap = {};
         for (let layerName of layerNames) {
@@ -16,7 +18,7 @@ export default class RenderHandler {
         let context = this.canvas.getContext('2d');
         if (context) {
             for (let layerName of this.layerNames) {
-                context.drawImage(this.layerMap[layerName], 0, 0);
+                context.drawImage(this.layerMap[layerName], 0, 0, this.width, this.height);
             }
         }
         return this.canvas;

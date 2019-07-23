@@ -50,7 +50,7 @@ export default class Loop implements State {
         this.canvas.width = 480;
         this.canvas.height = 360;
 
-        this.gameRenderer = new RenderHandler(this.canvas, ["background", "game", "ui"]);
+        this.gameRenderer = new RenderHandler(this.canvas, 480, 360, ["background", "game", "ui"]);
 
         this.context = this.canvas.getContext('2d') || new CanvasRenderingContext2D();
         
@@ -292,7 +292,7 @@ export default class Loop implements State {
         }
     }
 
-    render() {
+    render(renderer: RenderHandler) {
         let context = this.realCanvas.getContext("2d");
         if (context) {
             context.drawImage(this.gameRenderer.render(), 0, 0, this.realCanvas.width, this.realCanvas.height);

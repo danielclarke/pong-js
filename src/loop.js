@@ -27,7 +27,7 @@ export default class Loop {
         this.canvas = document.createElement("canvas");
         this.canvas.width = 480;
         this.canvas.height = 360;
-        this.gameRenderer = new RenderHandler(this.canvas, ["background", "game", "ui"]);
+        this.gameRenderer = new RenderHandler(this.canvas, 480, 360, ["background", "game", "ui"]);
         this.context = this.canvas.getContext('2d') || new CanvasRenderingContext2D();
         this.state = LoopState.PreGame;
         this.keyboardHandler = new KeyboardHandler();
@@ -230,7 +230,7 @@ export default class Loop {
             uiContext.fillText(`${this.p1Score} - ${this.p2Score}`, this.canvas.width / 2 - 33, 30);
         }
     }
-    render() {
+    render(renderer) {
         let context = this.realCanvas.getContext("2d");
         if (context) {
             context.drawImage(this.gameRenderer.render(), 0, 0, this.realCanvas.width, this.realCanvas.height);

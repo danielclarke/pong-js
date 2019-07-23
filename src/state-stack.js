@@ -1,12 +1,13 @@
 export default class StateStack {
-    constructor() {
+    constructor(renderer) {
+        this.renderer = renderer;
         this.states = [];
     }
     update(dt) {
         this.states[this.states.length - 1].update(this, dt);
     }
     render() {
-        this.states.forEach((state) => { state.render(); });
+        this.states.forEach((state) => { state.render(this.renderer); });
     }
     handleInputs() {
         this.states[this.states.length - 1].handleInputs(this);

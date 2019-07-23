@@ -1,6 +1,7 @@
 import Loop from "./loop.js"
 import TitleState from "./title-state.js"
-import StateStack, { State } from "./state-stack.js"
+import StateStack from "./state-stack.js"
+import RenderHandler from "./render-handler.js"
 
 let canvas: HTMLCanvasElement = document.getElementById('main-layer') as HTMLCanvasElement;
 // canvas.width = window.innerWidth;

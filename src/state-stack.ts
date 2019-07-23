@@ -1,8 +1,10 @@
+import RenderHandler from "./render-handler.js"
+
 export interface State {
     enter(): void;
     exit(stateStack: StateStack): void;
     update(stateStack: StateStack, dt: number): void;
-    render(): void;
+    render(renderer: RenderHandler): void;
     handleInputs(stateStack: StateStack): void;
 }
 
@@ -10,7 +12,7 @@ export default class StateStack {
 
     states: State[];
 
-    constructor() {
+    constructor(private renderer: RenderHandler) {
         this.states = [];
     }
 
@@ -19,7 +21,7 @@ export default class StateStack {
     }
 
     render(): void {
-        this.states.forEach((state: State) => {state.render()});
+        this.states.forEach((state: State) => {state.render(this.renderer)});
     }
 
     handleInputs(): void {
