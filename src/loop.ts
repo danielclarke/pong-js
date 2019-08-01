@@ -101,7 +101,7 @@ export default class Loop implements State {
     }
 
     isGameOver(): boolean {
-        const max_score = 1;
+        const max_score = 11;
         if (this.p1Score === max_score || this.p2Score === max_score) {
             return true;
         }

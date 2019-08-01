@@ -70,7 +70,7 @@ export default class Loop {
         stateStack.push(new GameOverState(this.renderer));
     }
     isGameOver() {
-        const max_score = 1;
+        const max_score = 11;
         if (this.p1Score === max_score || this.p2Score === max_score) {
             return true;
         }
