@@ -58,7 +58,7 @@ export default class Loop {
         }
     }
     pause(stateStack) {
-        stateStack.push(new PauseState(this.canvas));
+        stateStack.push(new PauseState(this.renderer));
     }
     gameOver(stateStack) {
         this.renderScore();
@@ -67,10 +67,10 @@ export default class Loop {
         this.p2Score = 0;
         this.p1Handler = getAiHandler(this.p1, this.ball);
         this.p2Handler = getAiHandler(this.p2, this.ball);
-        stateStack.push(new GameOverState(this.canvas));
+        stateStack.push(new GameOverState(this.renderer));
     }
     isGameOver() {
-        const max_score = 11;
+        const max_score = 1;
         if (this.p1Score === max_score || this.p2Score === max_score) {
             return true;
         }
@@ -207,24 +207,24 @@ export default class Loop {
         }
     }
     renderEntities() {
-        let gameContext = this.renderer.layerMap["game"].getContext("2d");
-        if (gameContext) {
-            gameContext.clearRect(0, 0, this.renderer.layerMap["game"].width, this.renderer.layerMap["game"].height);
-            gameContext.fillStyle = this.p1.colour;
-            gameContext.fillRect(Math.floor(this.p1.x), Math.floor(this.p1.y), this.p1.width, this.p1.height);
-            gameContext.fillStyle = this.p2.colour;
-            gameContext.fillRect(Math.floor(this.p2.x), Math.floor(this.p2.y), this.p2.width, this.p2.height);
-            gameContext.drawImage(this.ball.image, Math.floor(this.ball.x), Math.floor(this.ball.y));
+        let context = this.renderer.layerMap["game"].getContext("2d");
+        if (context) {
+            context.clearRect(0, 0, this.renderer.layerMap["game"].width, this.renderer.layerMap["game"].height);
+            context.fillStyle = this.p1.colour;
+            context.fillRect(Math.floor(this.p1.x), Math.floor(this.p1.y), this.p1.width, this.p1.height);
+            context.fillStyle = this.p2.colour;
+            context.fillRect(Math.floor(this.p2.x), Math.floor(this.p2.y), this.p2.width, this.p2.height);
+            context.drawImage(this.ball.image, Math.floor(this.ball.x), Math.floor(this.ball.y));
         }
     }
     renderScore() {
         // move to UI layer
-        let uiContext = this.renderer.layerMap["ui"].getContext("2d");
-        if (uiContext) {
-            uiContext.clearRect(0, 0, this.renderer.layerMap["game"].width, this.renderer.layerMap["game"].height);
-            uiContext.fillStyle = "White";
-            uiContext.font = "bold 25px Courier New";
-            uiContext.fillText(`${this.p1Score} - ${this.p2Score}`, this.renderer.width / 2 - 33, 30);
+        let context = this.renderer.layerMap["ui"].getContext("2d");
+        if (context) {
+            context.clearRect(0, 0, this.renderer.layerMap["ui"].width, this.renderer.layerMap["ui"].height);
+            context.fillStyle = "White";
+            context.font = "bold 25px Courier New";
+            context.fillText(`${this.p1Score} - ${this.p2Score}`, this.renderer.width / 2 - 33, 30);
         }
     }
     render() {

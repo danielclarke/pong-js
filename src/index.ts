@@ -43,7 +43,7 @@ function init(): void {
     let renderer = new RenderHandler(canvas, 480, 360, ["background", "game", "ui"]);
     let stateStack = new StateStack(renderer);
     stateStack.push(new Loop(renderer));
-    stateStack.push(new TitleState(canvas));
+    stateStack.push(new TitleState(renderer));
     animator(stateStack)(0);
 }
 init();

@@ -1,9 +1,8 @@
 import KeyboardHandler from "./keyboard-handler.js";
 export default class PauseState {
-    constructor(canvas) {
-        this.canvas = canvas;
+    constructor(renderer) {
+        this.renderer = renderer;
         this.keyboardHandler = new KeyboardHandler();
-        this.context = canvas.getContext('2d') || new CanvasRenderingContext2D();
         this.PauseSound = new Audio("assets/sounds/pause_sound.wav");
     }
     enter() {
@@ -13,9 +12,13 @@ export default class PauseState {
     exit() { }
     update(stateStack, dt) { }
     render() {
-        this.context.fillStyle = "White";
-        this.context.font = "bold 48px Courier New";
-        this.context.fillText(`PAUSE`, this.canvas.width / 2 - 68, this.canvas.height / 2 - 60);
+        let context = this.renderer.layerMap["ui"].getContext("2d");
+        if (context) {
+            context.clearRect(0, 0, this.renderer.layerMap["ui"].width, this.renderer.layerMap["ui"].height);
+            context.fillStyle = "White";
+            context.font = "bold 48px Courier New";
+            context.fillText(`PAUSE`, this.renderer.width / 2 - 68, this.renderer.height / 2 - 60);
+        }
     }
     handleInputs(stateStack) {
         if (this.keyboardHandler.pressedKeys['p']) {

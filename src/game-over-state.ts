@@ -1,15 +1,14 @@
 import StateStack, {State} from "./state-stack.js"
 import KeyboardHandler from "./keyboard-handler.js"
 import TitleState from "./title-state.js"
+import RenderHandler from "./render-handler.js"
 
 export default class GameOverState implements State {
-    context: CanvasRenderingContext2D;
     keyboardHandler: KeyboardHandler;
     gameOverSound: HTMLAudioElement;
     
-    constructor(public canvas: HTMLCanvasElement) {
+    constructor(public renderer: RenderHandler) {
         this.keyboardHandler = new KeyboardHandler();
-        this.context = canvas.getContext('2d') || new CanvasRenderingContext2D();
         this.gameOverSound = new Audio("assets/sounds/game_over.wav");
     }
     enter(): void {
@@ -17,14 +16,19 @@ export default class GameOverState implements State {
         this.keyboardHandler = new KeyboardHandler();
     }
     exit(stateStack: StateStack): void {
-        stateStack.push(new TitleState(this.canvas));
+        stateStack.push(new TitleState(this.renderer));
     }
     update(stateStack: StateStack, dt: number): void {
         
     }
     render(): void {
-        this.context.font = "bold 48px Courier New";
-        this.context.fillText(`GAME OVER`, this.canvas.width / 2 - 125, this.canvas.height / 2 - 60); 
+        let context = this.renderer.layerMap["ui"].getContext("2d");
+        if (context) {
+            context.clearRect(0, 0, this.renderer.layerMap["ui"].width, this.renderer.layerMap["ui"].height);
+            context.font = "bold 48px Courier New";
+            context.fillText(`GAME OVER`, this.renderer.width / 2 - 125, this.renderer.height / 2 - 60);
+            this.renderer.render();
+        }
     }
     handleInputs(stateStack: StateStack): void {
         if (this.keyboardHandler.pressedKeys['space']) {
