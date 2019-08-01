@@ -4,8 +4,8 @@ export default class RenderHandler {
         this.layerMap = {};
         for (let layerName of layerNames) {
             this.layerMap[layerName] = document.createElement("canvas");
-            this.layerMap[layerName].width = canvas.width;
-            this.layerMap[layerName].height = canvas.height;
+            this.layerMap[layerName].width = width;
+            this.layerMap[layerName].height = height;
         }
     }
 
@@ -17,7 +17,7 @@ export default class RenderHandler {
         let context = this.canvas.getContext('2d');
         if (context) {
             for (let layerName of this.layerNames) {
-                context.drawImage(this.layerMap[layerName], 0, 0, this.width, this.height);
+                context.drawImage(this.layerMap[layerName], 0, 0, this.canvas.width, this.canvas.height);
             }
         }
         return this.canvas;

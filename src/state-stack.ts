@@ -4,7 +4,7 @@ export interface State {
     enter(): void;
     exit(stateStack: StateStack): void;
     update(stateStack: StateStack, dt: number): void;
-    render(renderer: RenderHandler): void;
+    render(): void;
     handleInputs(stateStack: StateStack): void;
 }
 
@@ -21,7 +21,7 @@ export default class StateStack {
     }
 
     render(): void {
-        this.states.forEach((state: State) => {state.render(this.renderer)});
+        this.states.forEach((state: State) => {state.render()});
     }
 
     handleInputs(): void {

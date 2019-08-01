@@ -5,7 +5,6 @@ import Player, { getPlayerHandler, getAiHandler } from "./player.js";
 import { restrictPlayerMovement, restrictBallMovement } from "./physics.js";
 import GameOverState from "./game-over-state.js";
 import PauseState from "./pause-state.js";
-import RenderHandler from "./render-handler.js";
 var LoopState;
 (function (LoopState) {
     LoopState["PreGame"] = "PRE_GAME";
@@ -22,21 +21,19 @@ var LoopState;
     game over --enter--> pre game
 */
 export default class Loop {
-    constructor(realCanvas) {
-        this.realCanvas = realCanvas;
+    constructor(renderer) {
+        this.renderer = renderer;
         this.canvas = document.createElement("canvas");
-        this.canvas.width = 480;
-        this.canvas.height = 360;
-        this.gameRenderer = new RenderHandler(this.canvas, 480, 360, ["background", "game", "ui"]);
-        this.context = this.canvas.getContext('2d') || new CanvasRenderingContext2D();
+        this.renderer.width = 480;
+        this.renderer.height = 360;
         this.state = LoopState.PreGame;
         this.keyboardHandler = new KeyboardHandler();
         this.scoreSound = new Audio("assets/sounds/score.wav");
         this.paddleHitSound = new Audio("assets/sounds/paddle_hit.wav");
         this.wallHitSound = new Audio("assets/sounds/wall_hit.wav");
-        this.ball = new Ball(this.canvas.width / 2, this.canvas.height / 2, "#B1F70E");
+        this.ball = new Ball(this.renderer.width / 2, this.renderer.height / 2, "#B1F70E");
         this.p1 = new Player(10, 10, "#FF1B0F");
-        this.p2 = new Player(this.canvas.width - this.p1.width - 10, this.canvas.height - this.p1.height - 10, "#E10D92");
+        this.p2 = new Player(this.renderer.width - this.p1.width - 10, this.renderer.height - this.p1.height - 10, "#E10D92");
         this.p1Score = 0;
         this.p2Score = 0;
         this.p1Handler = getAiHandler(this.p1, this.ball);
@@ -54,7 +51,7 @@ export default class Loop {
             this.renderBackground();
             this.renderEntities();
             this.renderScore();
-            this.gameRenderer.render();
+            this.renderer.render();
         };
         for (let img of this.grassImages) {
             img.onload = f;
@@ -64,7 +61,7 @@ export default class Loop {
         stateStack.push(new PauseState(this.canvas));
     }
     gameOver(stateStack) {
-        this.render();
+        this.renderScore();
         this.state = LoopState.PreGame;
         this.p1Score = 0;
         this.p2Score = 0;
@@ -125,7 +122,7 @@ export default class Loop {
         this.keyboardHandler = new KeyboardHandler();
         this.renderEntities();
         this.renderScore();
-        this.gameRenderer.render();
+        this.renderer.render();
     }
     exit(stateStack) { }
     handleCollision() {
@@ -160,7 +157,7 @@ export default class Loop {
             // this.ball.dx = - this.ball.dx * 0.9;
             this.renderScore();
         }
-        else if (this.canvas.width < this.ball.x - 4 * this.ball.width) {
+        else if (this.renderer.width < this.ball.x - 4 * this.ball.width) {
             this.ball.reset();
             this.scoreSound.play();
             this.p1Score += 1;
@@ -174,8 +171,8 @@ export default class Loop {
         const paddleSpeed = dt / 4;
         const ballSpeed = paddleSpeed * 1.1 / dt;
         const padding = 10;
-        const playerBoundary = new AABB(new Point(padding, padding), this.canvas.width - padding * 2, this.canvas.height - padding * 2);
-        const ballBoundary = new AABB(new Point(0, 0), this.canvas.width, this.canvas.height);
+        const playerBoundary = new AABB(new Point(padding, padding), this.renderer.width - padding * 2, this.renderer.height - padding * 2);
+        const ballBoundary = new AABB(new Point(0, 0), this.renderer.width, this.renderer.height);
         this.p1.update(dt);
         restrictPlayerMovement(this.p1, playerBoundary);
         this.p2.update(dt);
@@ -200,19 +197,19 @@ export default class Loop {
         this.renderEntities();
     }
     renderBackground() {
-        let bgContext = this.gameRenderer.layerMap["background"].getContext("2d");
+        let bgContext = this.renderer.layerMap["background"].getContext("2d");
         if (bgContext) {
-            for (let i = 0; i < this.canvas.width; i += 7) {
-                for (let j = 0; j < this.canvas.height; j += 7) {
+            for (let i = 0; i < this.renderer.width; i += 7) {
+                for (let j = 0; j < this.renderer.height; j += 7) {
                     bgContext.drawImage(this.grassImages[Math.floor(Math.random() * 3)], i, j);
                 }
             }
         }
     }
     renderEntities() {
-        let gameContext = this.gameRenderer.layerMap["game"].getContext("2d");
+        let gameContext = this.renderer.layerMap["game"].getContext("2d");
         if (gameContext) {
-            gameContext.clearRect(0, 0, this.gameRenderer.layerMap["game"].width, this.gameRenderer.layerMap["game"].height);
+            gameContext.clearRect(0, 0, this.renderer.layerMap["game"].width, this.renderer.layerMap["game"].height);
             gameContext.fillStyle = this.p1.colour;
             gameContext.fillRect(Math.floor(this.p1.x), Math.floor(this.p1.y), this.p1.width, this.p1.height);
             gameContext.fillStyle = this.p2.colour;
@@ -222,18 +219,15 @@ export default class Loop {
     }
     renderScore() {
         // move to UI layer
-        let uiContext = this.gameRenderer.layerMap["ui"].getContext("2d");
+        let uiContext = this.renderer.layerMap["ui"].getContext("2d");
         if (uiContext) {
-            uiContext.clearRect(0, 0, this.gameRenderer.layerMap["game"].width, this.gameRenderer.layerMap["game"].height);
+            uiContext.clearRect(0, 0, this.renderer.layerMap["game"].width, this.renderer.layerMap["game"].height);
             uiContext.fillStyle = "White";
             uiContext.font = "bold 25px Courier New";
-            uiContext.fillText(`${this.p1Score} - ${this.p2Score}`, this.canvas.width / 2 - 33, 30);
+            uiContext.fillText(`${this.p1Score} - ${this.p2Score}`, this.renderer.width / 2 - 33, 30);
         }
     }
-    render(renderer) {
-        let context = this.realCanvas.getContext("2d");
-        if (context) {
-            context.drawImage(this.gameRenderer.render(), 0, 0, this.realCanvas.width, this.realCanvas.height);
-        }
+    render() {
+        this.renderer.render();
     }
 }

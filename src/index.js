@@ -1,6 +1,7 @@
 import Loop from "./loop.js";
 import TitleState from "./title-state.js";
 import StateStack from "./state-stack.js";
+import RenderHandler from "./render-handler.js";
 let canvas = document.getElementById('main-layer');
 // canvas.width = window.innerWidth;
 // canvas.height = window.innerHeight;
@@ -28,8 +29,9 @@ function animator(stateStack) {
     return animate;
 }
 function init() {
-    let stateStack = new StateStack();
-    stateStack.push(new Loop(canvas));
+    let renderer = new RenderHandler(canvas, 480, 360, ["background", "game", "ui"]);
+    let stateStack = new StateStack(renderer);
+    stateStack.push(new Loop(renderer));
     stateStack.push(new TitleState(canvas));
     animator(stateStack)(0);
 }
