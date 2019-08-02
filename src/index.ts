@@ -4,10 +4,15 @@ import StateStack from "./state-stack.js"
 import RenderHandler from "./render-handler.js"
 
 let canvas: HTMLCanvasElement = document.getElementById('main-layer') as HTMLCanvasElement;
-// canvas.width = window.innerWidth;
-// canvas.height = window.innerHeight;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
 const FPS = 60;
+
+function handleResize(ev: UIEvent) {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
 
 function animator(stateStack: StateStack) {
     const period = 1000.0 / FPS;
@@ -47,3 +52,4 @@ function init(): void {
     animator(stateStack)(0);
 }
 init();
+window.onresize = handleResize;
